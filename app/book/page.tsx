@@ -106,16 +106,7 @@ export default function BookingPage() {
     const canProceedStep1 = checkIn && checkOut && guestCount && !availabilityError && pricing;
 
     return (
-        <div className="min-h-screen bg-[#FAFAF9]">
-            {/* Header */}
-            <nav className="bg-white border-b border-stone-200">
-                <div className="max-w-7xl mx-auto px-6 py-4">
-                    <Link href="/" className="text-xl serif font-light text-stone-900">
-                        The Obsidian
-                    </Link>
-                </div>
-            </nav>
-
+        <div className="min-h-screen bg-[#FAFAF9] pt-20">
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-6 py-12">
                 <ProgressIndicator steps={steps} currentStep={currentStep} />

@@ -75,38 +75,7 @@ export default function AvailabilityPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-[#FAFAF9]">
-            {/* Header */}
-            <nav className="bg-white border-b border-stone-200">
-                <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-                    <Link href="/" className="text-xl serif font-light text-stone-900">
-                        The Obsidian
-                    </Link>
-
-                    <div className="hidden md:flex items-center gap-8">
-                        <Link href="/" className="text-sm text-stone-600 hover:text-stone-900 transition-colors">
-                            Home
-                        </Link>
-                        <Link href="/availability" className="text-sm text-[#A18058] font-medium">
-                            Availability
-                        </Link>
-                        <Link href="/about" className="text-sm text-stone-600 hover:text-stone-900 transition-colors">
-                            About
-                        </Link>
-                        <Link href="/contact" className="text-sm text-stone-600 hover:text-stone-900 transition-colors">
-                            Contact
-                        </Link>
-                    </div>
-
-                    <Link
-                        href="/book"
-                        className="bg-[#1C1917] hover:bg-[#292524] text-[#FAFAF9] px-6 py-2 rounded-full text-xs font-semibold uppercase tracking-widest transition-all"
-                    >
-                        Book Now
-                    </Link>
-                </div>
-            </nav>
-
+        <div className="min-h-screen bg-[#FAFAF9] pt-20">
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-6 py-12">
                 {/* Page Header */}
