@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,6 +17,7 @@ const steps = ['Dates & Guests', 'Guest Information', 'Review & Confirm'];
 
 export default function BookingPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [currentStep, setCurrentStep] = useState(0);
     const [pricing, setPricing] = useState<PricingBreakdown | null>(null);
     const [availabilityError, setAvailabilityError] = useState<string>('');
@@ -39,6 +40,17 @@ export default function BookingPage() {
     const checkIn = watch('checkIn');
     const checkOut = watch('checkOut');
     const guestCount = watch('guestCount');
+
+    // Pre-fill form from URL parameters
+    useEffect(() => {
+        const checkInParam = searchParams.get('checkIn');
+        const checkOutParam = searchParams.get('checkOut');
+        const guestsParam = searchParams.get('guests');
+
+        if (checkInParam) setValue('checkIn', checkInParam);
+        if (checkOutParam) setValue('checkOut', checkOutParam);
+        if (guestsParam) setValue('guestCount', parseInt(guestsParam));
+    }, [searchParams, setValue]);
 
     // Calculate pricing when dates change
     useEffect(() => {
