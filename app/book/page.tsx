@@ -449,6 +449,9 @@ export default function BookingPage() {
                     {/* Right Side - Pricing Summary */}
                     <div className="lg:w-2/5">
                         <PricingSummary pricing={pricing} checkIn={checkIn} checkOut={checkOut} />
+                        <p className="text-center text-xs text-stone-600 font-light mt-4">
+                            You won't be charged yet
+                        </p>
                     </div>
                 </div>
             </div>

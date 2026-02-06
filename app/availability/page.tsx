@@ -209,6 +209,10 @@ export default function AvailabilityPage() {
                                         Continue to Booking
                                         <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                                     </button>
+
+                                    <p className="text-center text-xs text-stone-600 font-light">
+                                        You won't be charged yet
+                                    </p>
                                 </motion.div>
                             ) : (
                                 <div className="bg-white/90 backdrop-blur-md border border-stone-200 rounded-2xl p-6 shadow-sm">

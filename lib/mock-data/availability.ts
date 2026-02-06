@@ -1,48 +1,47 @@
-export const mockBlockedDates = [
-    // Already booked
-    { date: '2026-03-15', reason: 'booked' as const },
-    { date: '2026-03-16', reason: 'booked' as const },
-    { date: '2026-03-17', reason: 'booked' as const },
+export interface BlockedDate {
+    start: string;
+    end: string;
+    reason: 'booked' | 'maintenance' | 'personal' | 'holiday';
+}
 
-    // Maintenance
-    { date: '2026-04-01', reason: 'maintenance' as const },
-    { date: '2026-04-02', reason: 'maintenance' as const },
-
-    // Personal use
-    { date: '2026-05-20', reason: 'personal' as const },
-    { date: '2026-05-21', reason: 'personal' as const },
-
-    // Holidays
-    { date: '2026-12-24', reason: 'holiday' as const },
-    { date: '2026-12-25', reason: 'holiday' as const },
-    { date: '2026-12-31', reason: 'holiday' as const },
-    { date: '2027-01-01', reason: 'holiday' as const },
+export const mockBlockedDates: BlockedDate[] = [
+    { start: '2026-02-10', end: '2026-02-15', reason: 'booked' },
+    { start: '2026-02-20', end: '2026-02-22', reason: 'maintenance' },
+    { start: '2026-03-01', end: '2026-03-07', reason: 'booked' },
+    { start: '2026-03-15', end: '2026-03-20', reason: 'personal' },
+    { start: '2026-04-05', end: '2026-04-12', reason: 'booked' },
+    { start: '2026-04-25', end: '2026-04-28', reason: 'holiday' },
 ];
 
-export function isDateAvailable(date: Date): boolean {
-    const dateStr = date.toISOString().split('T')[0];
-    return !mockBlockedDates.some(blocked => blocked.date === dateStr);
+export interface AvailabilityCheck {
+    available: boolean;
+    message: string;
 }
 
-export function getBlockedDatesInRange(startDate: Date, endDate: Date) {
-    return mockBlockedDates.filter(blocked => {
-        const blockedDate = new Date(blocked.date);
-        return blockedDate >= startDate && blockedDate <= endDate;
-    });
-}
-
-export function checkAvailability(checkIn: string, checkOut: string) {
+export const checkAvailability = (checkIn: string, checkOut: string): AvailabilityCheck => {
     const start = new Date(checkIn);
     const end = new Date(checkOut);
 
-    const blockedDates = getBlockedDatesInRange(start, end);
-    const available = blockedDates.length === 0;
+    // Check if dates overlap with any blocked dates
+    for (const blocked of mockBlockedDates) {
+        const blockedStart = new Date(blocked.start);
+        const blockedEnd = new Date(blocked.end);
+
+        // Check for overlap
+        if (
+            (start >= blockedStart && start <= blockedEnd) ||
+            (end >= blockedStart && end <= blockedEnd) ||
+            (start <= blockedStart && end >= blockedEnd)
+        ) {
+            return {
+                available: false,
+                message: `These dates are not available. The property is ${blocked.reason === 'booked' ? 'already booked' : blocked.reason} during this period.`,
+            };
+        }
+    }
 
     return {
-        available,
-        blockedDates: blockedDates.map(d => d.date),
-        message: available
-            ? 'Dates are available!'
-            : 'Some dates in your range are not available.',
+        available: true,
+        message: 'These dates are available!',
     };
-}
+};
