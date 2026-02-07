@@ -13,7 +13,7 @@ import { calculateBookingPrice, type PricingBreakdown } from '@/lib/mock-data/pr
 import { checkAvailability } from '@/lib/mock-data/availability';
 import Link from 'next/link';
 
-const steps = ['Dates & Guests', 'Guest Information', 'Review & Confirm'];
+const steps = ['Dates & Guests', 'Guest Information', 'Review & Confirm', 'Payment'];
 
 export default function BookingPage() {
     const router = useRouter();
@@ -424,11 +424,190 @@ export default function BookingPage() {
                                                 Back
                                             </button>
                                             <button
+                                                type="button"
+                                                onClick={nextStep}
+                                                className="flex-1 bg-[#1C1917] hover:bg-[#292524] text-[#FAFAF9] py-4 rounded-full text-xs font-semibold uppercase tracking-widest transition-all shadow-xl flex items-center justify-center gap-2 group"
+                                            >
+                                                Continue to Payment
+                                                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            )}
+
+                            {/* Step 4: Payment */}
+                            {currentStep === 3 && (
+                                <form onSubmit={handleSubmit(onSubmit)}>
+                                    <h1 className="text-4xl md:text-5xl serif font-light text-stone-900 mb-3">
+                                        Payment Details
+                                    </h1>
+                                    <p className="text-lg text-stone-600 font-light mb-8">
+                                        Secure your reservation with payment
+                                    </p>
+
+                                    <div className="space-y-6">
+                                        {/* Card Number */}
+                                        <div className="group relative px-4 py-3 rounded-2xl border transition-colors bg-white border-stone-200 hover:border-[#A18058]/50 focus-within:border-[#A18058]">
+                                            <label className="block text-[9px] font-semibold text-[#A18058] uppercase tracking-widest mb-1">
+                                                Card Number
+                                            </label>
+                                            <input
+                                                type="text"
+                                                {...register('cardNumber')}
+                                                placeholder="1234 5678 9012 3456"
+                                                maxLength={19}
+                                                className="w-full bg-transparent border-none outline-none text-sm font-medium text-stone-900"
+                                            />
+                                        </div>
+                                        {errors.cardNumber && (
+                                            <p className="text-xs text-red-500 mt-1">{errors.cardNumber.message}</p>
+                                        )}
+
+                                        {/* Card Expiry & CVV */}
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <div className="group relative px-4 py-3 rounded-2xl border transition-colors bg-white border-stone-200 hover:border-[#A18058]/50 focus-within:border-[#A18058]">
+                                                    <label className="block text-[9px] font-semibold text-[#A18058] uppercase tracking-widest mb-1">
+                                                        Expiry Date
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        {...register('cardExpiry')}
+                                                        placeholder="MM/YY"
+                                                        maxLength={5}
+                                                        className="w-full bg-transparent border-none outline-none text-sm font-medium text-stone-900"
+                                                    />
+                                                </div>
+                                                {errors.cardExpiry && (
+                                                    <p className="text-xs text-red-500 mt-1">{errors.cardExpiry.message}</p>
+                                                )}
+                                            </div>
+
+                                            <div>
+                                                <div className="group relative px-4 py-3 rounded-2xl border transition-colors bg-white border-stone-200 hover:border-[#A18058]/50 focus-within:border-[#A18058]">
+                                                    <label className="block text-[9px] font-semibold text-[#A18058] uppercase tracking-widest mb-1">
+                                                        CVV
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        {...register('cardCvv')}
+                                                        placeholder="123"
+                                                        maxLength={4}
+                                                        className="w-full bg-transparent border-none outline-none text-sm font-medium text-stone-900"
+                                                    />
+                                                </div>
+                                                {errors.cardCvv && (
+                                                    <p className="text-xs text-red-500 mt-1">{errors.cardCvv.message}</p>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Cardholder Name */}
+                                        <div className="group relative px-4 py-3 rounded-2xl border transition-colors bg-white border-stone-200 hover:border-[#A18058]/50 focus-within:border-[#A18058]">
+                                            <label className="block text-[9px] font-semibold text-[#A18058] uppercase tracking-widest mb-1">
+                                                Cardholder Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                {...register('cardName')}
+                                                placeholder="John Doe"
+                                                className="w-full bg-transparent border-none outline-none text-sm font-medium text-stone-900"
+                                            />
+                                        </div>
+                                        {errors.cardName && (
+                                            <p className="text-xs text-red-500 mt-1">{errors.cardName.message}</p>
+                                        )}
+
+                                        {/* Billing Address */}
+                                        <div className="p-6 rounded-2xl bg-stone-50 border border-stone-200">
+                                            <h3 className="text-sm font-semibold uppercase tracking-widest text-[#A18058] mb-4">
+                                                Billing Address
+                                            </h3>
+
+                                            <div className="space-y-4">
+                                                <div className="group relative px-4 py-3 rounded-2xl border transition-colors bg-white border-stone-200 hover:border-[#A18058]/50 focus-within:border-[#A18058]">
+                                                    <label className="block text-[9px] font-semibold text-[#A18058] uppercase tracking-widest mb-1">
+                                                        Street Address
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        {...register('billingAddress')}
+                                                        placeholder="123 Main Street"
+                                                        className="w-full bg-transparent border-none outline-none text-sm font-medium text-stone-900"
+                                                    />
+                                                </div>
+                                                {errors.billingAddress && (
+                                                    <p className="text-xs text-red-500 mt-1">{errors.billingAddress.message}</p>
+                                                )}
+
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <div className="group relative px-4 py-3 rounded-2xl border transition-colors bg-white border-stone-200 hover:border-[#A18058]/50 focus-within:border-[#A18058]">
+                                                            <label className="block text-[9px] font-semibold text-[#A18058] uppercase tracking-widest mb-1">
+                                                                City
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                {...register('billingCity')}
+                                                                placeholder="Los Angeles"
+                                                                className="w-full bg-transparent border-none outline-none text-sm font-medium text-stone-900"
+                                                            />
+                                                        </div>
+                                                        {errors.billingCity && (
+                                                            <p className="text-xs text-red-500 mt-1">{errors.billingCity.message}</p>
+                                                        )}
+                                                    </div>
+
+                                                    <div>
+                                                        <div className="group relative px-4 py-3 rounded-2xl border transition-colors bg-white border-stone-200 hover:border-[#A18058]/50 focus-within:border-[#A18058]">
+                                                            <label className="block text-[9px] font-semibold text-[#A18058] uppercase tracking-widest mb-1">
+                                                                ZIP Code
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                {...register('billingZip')}
+                                                                placeholder="90210"
+                                                                className="w-full bg-transparent border-none outline-none text-sm font-medium text-stone-900"
+                                                            />
+                                                        </div>
+                                                        {errors.billingZip && (
+                                                            <p className="text-xs text-red-500 mt-1">{errors.billingZip.message}</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Security Notice */}
+                                        <div className="flex items-start gap-3 p-4 rounded-2xl bg-[#A18058]/5 border border-[#A18058]/20">
+                                            <CheckCircle size={20} className="text-[#A18058] flex-shrink-0 mt-0.5" />
+                                            <div>
+                                                <p className="text-sm font-medium text-stone-900 mb-1">
+                                                    Secure Payment
+                                                </p>
+                                                <p className="text-xs text-stone-600 leading-relaxed">
+                                                    Your payment information is encrypted and secure. We use industry-standard SSL encryption to protect your data.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Action Buttons */}
+                                        <div className="flex gap-4 mt-8">
+                                            <button
+                                                type="button"
+                                                onClick={prevStep}
+                                                className="flex-1 bg-white hover:bg-stone-50 border border-stone-300 text-stone-900 py-4 rounded-full text-xs font-semibold uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <ArrowLeft size={16} />
+                                                Back
+                                            </button>
+                                            <button
                                                 type="submit"
                                                 className="flex-1 bg-[#A18058] hover:bg-[#8a6a47] text-white py-4 rounded-full text-xs font-semibold uppercase tracking-widest transition-all shadow-xl flex items-center justify-center gap-2 group"
                                             >
                                                 <CheckCircle size={16} />
-                                                Confirm Booking
+                                                Complete Booking
                                             </button>
                                         </div>
                                     </div>
@@ -440,9 +619,11 @@ export default function BookingPage() {
                     {/* Right Side - Pricing Summary */}
                     <div className="lg:w-2/5">
                         <PricingSummary pricing={pricing} checkIn={checkIn} checkOut={checkOut} />
-                        <p className="text-center text-xs text-stone-600 font-light mt-4">
-                            You won't be charged yet
-                        </p>
+                        {currentStep < 3 && (
+                            <p className="text-center text-xs text-stone-600 font-light mt-4">
+                                You won't be charged yet
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>
