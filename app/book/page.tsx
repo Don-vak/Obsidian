@@ -9,8 +9,7 @@ import { Calendar, Users, Mail, Phone, User, ArrowRight, ArrowLeft, CheckCircle 
 import { ProgressIndicator } from '@/components/ProgressIndicator';
 import { PricingSummary } from '@/components/PricingSummary';
 import { bookingFormSchema, type BookingFormData } from '@/lib/schemas/booking';
-import { calculateBookingPrice, type PricingBreakdown } from '@/lib/mock-data/pricing';
-import { checkAvailability } from '@/lib/mock-data/availability';
+import { type PricingBreakdown } from '@/lib/mock-data/pricing';
 import Link from 'next/link';
 
 const steps = ['Dates & Guests', 'Guest Information', 'Review & Confirm', 'Payment'];
@@ -21,6 +20,7 @@ export default function BookingPage() {
     const [currentStep, setCurrentStep] = useState(0);
     const [pricing, setPricing] = useState<PricingBreakdown | null>(null);
     const [availabilityError, setAvailabilityError] = useState<string>('');
+    const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
 
     const {
         register,
@@ -60,33 +60,68 @@ export default function BookingPage() {
             const nights = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
 
             if (nights > 0) {
-                // Check availability
-                const availability = checkAvailability(checkIn, checkOut);
-                if (!availability.available) {
-                    setAvailabilityError(availability.message);
-                    setPricing(null);
-                } else {
-                    setAvailabilityError('');
-                    const calculatedPricing = calculateBookingPrice(nights);
-                    setPricing(calculatedPricing);
-                }
+                setIsCheckingAvailability(true);
+
+                // Check availability via API
+                fetch(`/api/availability?checkIn=${checkIn}&checkOut=${checkOut}`)
+                    .then(res => res.json())
+                    .then(availability => {
+                        if (!availability.available) {
+                            setAvailabilityError(availability.message);
+                            setPricing(null);
+                            setIsCheckingAvailability(false);
+                        } else {
+                            setAvailabilityError('');
+
+                            // Calculate pricing via API
+                            return fetch(`/api/pricing/calculate?nights=${nights}`);
+                        }
+                    })
+                    .then(res => res?.json())
+                    .then(calculatedPricing => {
+                        if (calculatedPricing) {
+                            setPricing(calculatedPricing);
+                        }
+                        setIsCheckingAvailability(false);
+                    })
+                    .catch(error => {
+                        console.error('Error checking availability/pricing:', error);
+                        setAvailabilityError('Error checking availability. Please try again.');
+                        setIsCheckingAvailability(false);
+                    });
             }
         }
     }, [checkIn, checkOut]);
 
-    const onSubmit = (data: BookingFormData) => {
-        // Mock booking submission
-        console.log('Booking submitted:', data);
+    const onSubmit = async (data: BookingFormData) => {
+        try {
+            // Submit booking to API
+            const response = await fetch('/api/bookings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
 
-        // Store booking data in sessionStorage for success page
-        sessionStorage.setItem('bookingData', JSON.stringify({
-            ...data,
-            pricing,
-            bookingId: Math.random().toString(36).substr(2, 9),
-        }));
+            const result = await response.json();
 
-        // Redirect to success page
-        router.push('/booking-success');
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to create booking');
+            }
+
+            // Store booking data in sessionStorage for success page
+            sessionStorage.setItem('bookingData', JSON.stringify({
+                ...result.booking,
+                pricing,
+            }));
+
+            // Redirect to success page
+            router.push('/booking-success');
+        } catch (error) {
+            console.error('Error creating booking:', error);
+            alert('Failed to create booking. Please try again.');
+        }
     };
 
     const nextStep = () => {

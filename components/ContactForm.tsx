@@ -25,11 +25,19 @@ export const ContactForm: React.FC = () => {
         setSubmitStatus('idle');
 
         try {
-            // Mock submission - log to console for now
-            console.log('Contact form submission:', data);
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
 
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to submit contact form');
+            }
 
             setSubmitStatus('success');
             reset();
@@ -57,8 +65,8 @@ export const ContactForm: React.FC = () => {
                         type="text"
                         id="name"
                         className={`w-full px-4 py-3 rounded-xl border transition-colors bg-white ${errors.name
-                                ? 'border-red-300 focus:border-red-500'
-                                : 'border-stone-200 focus:border-[#A18058]'
+                            ? 'border-red-300 focus:border-red-500'
+                            : 'border-stone-200 focus:border-[#A18058]'
                             } outline-none text-sm text-stone-900 placeholder:text-stone-400`}
                         placeholder="Your full name"
                     />
@@ -77,8 +85,8 @@ export const ContactForm: React.FC = () => {
                         type="email"
                         id="email"
                         className={`w-full px-4 py-3 rounded-xl border transition-colors bg-white ${errors.email
-                                ? 'border-red-300 focus:border-red-500'
-                                : 'border-stone-200 focus:border-[#A18058]'
+                            ? 'border-red-300 focus:border-red-500'
+                            : 'border-stone-200 focus:border-[#A18058]'
                             } outline-none text-sm text-stone-900 placeholder:text-stone-400`}
                         placeholder="your.email@example.com"
                     />
@@ -111,8 +119,8 @@ export const ContactForm: React.FC = () => {
                         type="text"
                         id="subject"
                         className={`w-full px-4 py-3 rounded-xl border transition-colors bg-white ${errors.subject
-                                ? 'border-red-300 focus:border-red-500'
-                                : 'border-stone-200 focus:border-[#A18058]'
+                            ? 'border-red-300 focus:border-red-500'
+                            : 'border-stone-200 focus:border-[#A18058]'
                             } outline-none text-sm text-stone-900 placeholder:text-stone-400`}
                         placeholder="How can we assist you?"
                     />
@@ -131,8 +139,8 @@ export const ContactForm: React.FC = () => {
                         id="message"
                         rows={5}
                         className={`w-full px-4 py-3 rounded-xl border transition-colors bg-white resize-none ${errors.message
-                                ? 'border-red-300 focus:border-red-500'
-                                : 'border-stone-200 focus:border-[#A18058]'
+                            ? 'border-red-300 focus:border-red-500'
+                            : 'border-stone-200 focus:border-[#A18058]'
                             } outline-none text-sm text-stone-900 placeholder:text-stone-400`}
                         placeholder="Tell us about your inquiry..."
                     />
