@@ -110,9 +110,17 @@ export default function BookingPage() {
                 throw new Error(result.error || 'Failed to create booking');
             }
 
-            // Store booking data in sessionStorage for success page
+            // Map database fields (snake_case) to success page fields (camelCase)
+            const booking = result.booking;
             sessionStorage.setItem('bookingData', JSON.stringify({
-                ...result.booking,
+                bookingId: booking.booking_number,
+                guestName: booking.guest_name,
+                guestEmail: booking.guest_email,
+                guestPhone: booking.guest_phone,
+                checkIn: booking.check_in,
+                checkOut: booking.check_out,
+                guestCount: booking.guest_count,
+                specialRequests: booking.special_requests,
                 pricing,
             }));
 
