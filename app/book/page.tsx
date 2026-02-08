@@ -469,7 +469,11 @@ export default function BookingPage() {
                                             <button
                                                 type="button"
                                                 onClick={nextStep}
-                                                className="flex-1 bg-[#1C1917] hover:bg-[#292524] text-[#FAFAF9] py-4 rounded-full text-xs font-semibold uppercase tracking-widest transition-all shadow-xl flex items-center justify-center gap-2 group"
+                                                disabled={!watch('agreeToHouseRules') || !watch('agreeToCancellationPolicy')}
+                                                className={`flex-1 py-4 rounded-full text-xs font-semibold uppercase tracking-widest transition-all shadow-xl flex items-center justify-center gap-2 group ${watch('agreeToHouseRules') && watch('agreeToCancellationPolicy')
+                                                        ? 'bg-[#1C1917] hover:bg-[#292524] text-[#FAFAF9] cursor-pointer'
+                                                        : 'bg-stone-300 text-stone-500 cursor-not-allowed'
+                                                    }`}
                                             >
                                                 Continue to Payment
                                                 <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />

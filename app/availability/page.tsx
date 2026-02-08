@@ -9,8 +9,8 @@ import Link from 'next/link';
 import { CalendarMonth } from '@/components/CalendarMonth';
 import { CalendarLegend } from '@/components/CalendarLegend';
 import { PricingSummary } from '@/components/PricingSummary';
-import { mockBlockedDates } from '@/lib/mock-data/availability';
 import { calculateBookingPrice, type PricingBreakdown } from '@/lib/mock-data/pricing';
+import type { BlockedDate } from '@/lib/mock-data/availability';
 
 export default function AvailabilityPage() {
     const router = useRouter();
@@ -19,6 +19,26 @@ export default function AvailabilityPage() {
     const [selectedEnd, setSelectedEnd] = useState<Date | null>(null);
     const [hoveredDate, setHoveredDate] = useState<Date | null>(null);
     const [pricing, setPricing] = useState<PricingBreakdown | null>(null);
+    const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
+    const [isLoadingDates, setIsLoadingDates] = useState(true);
+
+    // Fetch blocked dates from API
+    useEffect(() => {
+        async function fetchBlockedDates() {
+            try {
+                const response = await fetch('/api/blocked-dates');
+                const data = await response.json();
+                if (response.ok) {
+                    setBlockedDates(data);
+                }
+            } catch (error) {
+                console.error('Error fetching blocked dates:', error);
+            } finally {
+                setIsLoadingDates(false);
+            }
+        }
+        fetchBlockedDates();
+    }, []);
 
     // Calculate pricing when dates are selected
     useEffect(() => {
@@ -144,7 +164,7 @@ export default function AvailabilityPage() {
                                     month={month}
                                     selectedStart={selectedStart}
                                     selectedEnd={selectedEnd}
-                                    blockedDates={mockBlockedDates}
+                                    blockedDates={blockedDates}
                                     onDateClick={handleDateClick}
                                     onHoverDate={setHoveredDate}
                                     hoveredDate={hoveredDate}
