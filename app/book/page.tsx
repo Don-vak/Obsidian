@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Calendar, Users, Mail, Phone, User, ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react';
 import { ProgressIndicator } from '@/components/ProgressIndicator';
 import { PricingSummary } from '@/components/PricingSummary';
+import { StripePaymentForm } from '@/components/StripePaymentForm';
 import { bookingFormSchema, type BookingFormData } from '@/lib/schemas/booking';
 import { type PricingBreakdown } from '@/lib/mock-data/pricing';
 import Link from 'next/link';
@@ -21,6 +22,9 @@ export default function BookingPage() {
     const [pricing, setPricing] = useState<PricingBreakdown | null>(null);
     const [availabilityError, setAvailabilityError] = useState<string>('');
     const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
+    const [clientSecret, setClientSecret] = useState<string>('');
+    const [paymentIntentId, setPaymentIntentId] = useState<string>('');
+    const [paymentError, setPaymentError] = useState<string>('');
 
     const {
         register,
@@ -132,8 +136,43 @@ export default function BookingPage() {
         }
     };
 
-    const nextStep = () => {
+    const nextStep = async () => {
         if (currentStep < steps.length - 1) {
+            // If moving to payment step (step 3 -> step 4), create payment intent
+            if (currentStep === 2 && pricing) {
+                try {
+                    const formData = watch();
+                    const response = await fetch('/api/create-payment-intent', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            checkIn: formData.checkIn,
+                            checkOut: formData.checkOut,
+                            guests: formData.guestCount,
+                            totalAmount: pricing.total,
+                            guestName: formData.guestName,
+                            guestEmail: formData.guestEmail,
+                            guestPhone: formData.guestPhone,
+                        }),
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        setPaymentError(data.error || 'Failed to initialize payment');
+                        return;
+                    }
+
+                    setClientSecret(data.clientSecret);
+                    setPaymentIntentId(data.paymentIntentId);
+                    setPaymentError('');
+                } catch (error) {
+                    console.error('Error creating payment intent:', error);
+                    setPaymentError('Failed to initialize payment. Please try again.');
+                    return;
+                }
+            }
+
             setCurrentStep(currentStep + 1);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -471,8 +510,8 @@ export default function BookingPage() {
                                                 onClick={nextStep}
                                                 disabled={!watch('agreeToHouseRules') || !watch('agreeToCancellationPolicy')}
                                                 className={`flex-1 py-4 rounded-full text-xs font-semibold uppercase tracking-widest transition-all shadow-xl flex items-center justify-center gap-2 group ${watch('agreeToHouseRules') && watch('agreeToCancellationPolicy')
-                                                        ? 'bg-[#1C1917] hover:bg-[#292524] text-[#FAFAF9] cursor-pointer'
-                                                        : 'bg-stone-300 text-stone-500 cursor-not-allowed'
+                                                    ? 'bg-[#1C1917] hover:bg-[#292524] text-[#FAFAF9] cursor-pointer'
+                                                    : 'bg-stone-300 text-stone-500 cursor-not-allowed'
                                                     }`}
                                             >
                                                 Continue to Payment
@@ -485,7 +524,7 @@ export default function BookingPage() {
 
                             {/* Step 4: Payment */}
                             {currentStep === 3 && (
-                                <form onSubmit={handleSubmit(onSubmit)}>
+                                <div>
                                     <h1 className="text-4xl md:text-5xl serif font-light text-stone-900 mb-3">
                                         Payment Details
                                     </h1>
@@ -493,172 +532,58 @@ export default function BookingPage() {
                                         Secure your reservation with payment
                                     </p>
 
-                                    <div className="space-y-6">
-                                        {/* Card Number */}
-                                        <div className="group relative px-4 py-3 rounded-2xl border transition-colors bg-white border-stone-200 hover:border-[#A18058]/50 focus-within:border-[#A18058]">
-                                            <label className="block text-[9px] font-semibold text-[#A18058] uppercase tracking-widest mb-1">
-                                                Card Number
-                                            </label>
-                                            <input
-                                                type="text"
-                                                {...register('cardNumber')}
-                                                placeholder="1234 5678 9012 3456"
-                                                maxLength={19}
-                                                className="w-full bg-transparent border-none outline-none text-sm font-medium text-stone-900"
-                                            />
+                                    {/* Payment Error */}
+                                    {paymentError && (
+                                        <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200">
+                                            <p className="text-sm font-medium text-red-900">
+                                                ❌ {paymentError}
+                                            </p>
                                         </div>
-                                        {errors.cardNumber && (
-                                            <p className="text-xs text-red-500 mt-1">{errors.cardNumber.message}</p>
-                                        )}
+                                    )}
 
-                                        {/* Card Expiry & CVV */}
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <div className="group relative px-4 py-3 rounded-2xl border transition-colors bg-white border-stone-200 hover:border-[#A18058]/50 focus-within:border-[#A18058]">
-                                                    <label className="block text-[9px] font-semibold text-[#A18058] uppercase tracking-widest mb-1">
-                                                        Expiry Date
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        {...register('cardExpiry')}
-                                                        placeholder="MM/YY"
-                                                        maxLength={5}
-                                                        className="w-full bg-transparent border-none outline-none text-sm font-medium text-stone-900"
-                                                    />
-                                                </div>
-                                                {errors.cardExpiry && (
-                                                    <p className="text-xs text-red-500 mt-1">{errors.cardExpiry.message}</p>
-                                                )}
-                                            </div>
-
-                                            <div>
-                                                <div className="group relative px-4 py-3 rounded-2xl border transition-colors bg-white border-stone-200 hover:border-[#A18058]/50 focus-within:border-[#A18058]">
-                                                    <label className="block text-[9px] font-semibold text-[#A18058] uppercase tracking-widest mb-1">
-                                                        CVV
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        {...register('cardCvv')}
-                                                        placeholder="123"
-                                                        maxLength={4}
-                                                        className="w-full bg-transparent border-none outline-none text-sm font-medium text-stone-900"
-                                                    />
-                                                </div>
-                                                {errors.cardCvv && (
-                                                    <p className="text-xs text-red-500 mt-1">{errors.cardCvv.message}</p>
-                                                )}
+                                    {/* Stripe Payment Form */}
+                                    {clientSecret ? (
+                                        <StripePaymentForm
+                                            clientSecret={clientSecret}
+                                            totalAmount={pricing?.total || 0}
+                                            onSuccess={(paymentIntentId) => {
+                                                // Redirect to success page with booking details
+                                                const formData = watch();
+                                                const params = new URLSearchParams({
+                                                    paymentIntentId,
+                                                    checkIn: formData.checkIn,
+                                                    checkOut: formData.checkOut,
+                                                    guests: formData.guestCount.toString(),
+                                                    guestName: formData.guestName,
+                                                    guestEmail: formData.guestEmail,
+                                                });
+                                                router.push(`/booking-success?${params.toString()}`);
+                                            }}
+                                            onError={(error) => {
+                                                setPaymentError(error);
+                                            }}
+                                        />
+                                    ) : (
+                                        <div className="flex items-center justify-center py-12">
+                                            <div className="text-center">
+                                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#A18058] mx-auto mb-4"></div>
+                                                <p className="text-sm text-stone-600">Loading payment form...</p>
                                             </div>
                                         </div>
+                                    )}
 
-                                        {/* Cardholder Name */}
-                                        <div className="group relative px-4 py-3 rounded-2xl border transition-colors bg-white border-stone-200 hover:border-[#A18058]/50 focus-within:border-[#A18058]">
-                                            <label className="block text-[9px] font-semibold text-[#A18058] uppercase tracking-widest mb-1">
-                                                Cardholder Name
-                                            </label>
-                                            <input
-                                                type="text"
-                                                {...register('cardName')}
-                                                placeholder="John Doe"
-                                                className="w-full bg-transparent border-none outline-none text-sm font-medium text-stone-900"
-                                            />
-                                        </div>
-                                        {errors.cardName && (
-                                            <p className="text-xs text-red-500 mt-1">{errors.cardName.message}</p>
-                                        )}
-
-                                        {/* Billing Address */}
-                                        <div className="p-6 rounded-2xl bg-stone-50 border border-stone-200">
-                                            <h3 className="text-sm font-semibold uppercase tracking-widest text-[#A18058] mb-4">
-                                                Billing Address
-                                            </h3>
-
-                                            <div className="space-y-4">
-                                                <div className="group relative px-4 py-3 rounded-2xl border transition-colors bg-white border-stone-200 hover:border-[#A18058]/50 focus-within:border-[#A18058]">
-                                                    <label className="block text-[9px] font-semibold text-[#A18058] uppercase tracking-widest mb-1">
-                                                        Street Address
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        {...register('billingAddress')}
-                                                        placeholder="123 Main Street"
-                                                        className="w-full bg-transparent border-none outline-none text-sm font-medium text-stone-900"
-                                                    />
-                                                </div>
-                                                {errors.billingAddress && (
-                                                    <p className="text-xs text-red-500 mt-1">{errors.billingAddress.message}</p>
-                                                )}
-
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div>
-                                                        <div className="group relative px-4 py-3 rounded-2xl border transition-colors bg-white border-stone-200 hover:border-[#A18058]/50 focus-within:border-[#A18058]">
-                                                            <label className="block text-[9px] font-semibold text-[#A18058] uppercase tracking-widest mb-1">
-                                                                City
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                {...register('billingCity')}
-                                                                placeholder="Los Angeles"
-                                                                className="w-full bg-transparent border-none outline-none text-sm font-medium text-stone-900"
-                                                            />
-                                                        </div>
-                                                        {errors.billingCity && (
-                                                            <p className="text-xs text-red-500 mt-1">{errors.billingCity.message}</p>
-                                                        )}
-                                                    </div>
-
-                                                    <div>
-                                                        <div className="group relative px-4 py-3 rounded-2xl border transition-colors bg-white border-stone-200 hover:border-[#A18058]/50 focus-within:border-[#A18058]">
-                                                            <label className="block text-[9px] font-semibold text-[#A18058] uppercase tracking-widest mb-1">
-                                                                ZIP Code
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                {...register('billingZip')}
-                                                                placeholder="90210"
-                                                                className="w-full bg-transparent border-none outline-none text-sm font-medium text-stone-900"
-                                                            />
-                                                        </div>
-                                                        {errors.billingZip && (
-                                                            <p className="text-xs text-red-500 mt-1">{errors.billingZip.message}</p>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Security Notice */}
-                                        <div className="flex items-start gap-3 p-4 rounded-2xl bg-[#A18058]/5 border border-[#A18058]/20">
-                                            <CheckCircle size={20} className="text-[#A18058] flex-shrink-0 mt-0.5" />
-                                            <div>
-                                                <p className="text-sm font-medium text-stone-900 mb-1">
-                                                    Secure Payment
-                                                </p>
-                                                <p className="text-xs text-stone-600 leading-relaxed">
-                                                    Your payment information is encrypted and secure. We use industry-standard SSL encryption to protect your data.
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        {/* Action Buttons */}
-                                        <div className="flex gap-4 mt-8">
-                                            <button
-                                                type="button"
-                                                onClick={prevStep}
-                                                className="flex-1 bg-white hover:bg-stone-50 border border-stone-300 text-stone-900 py-4 rounded-full text-xs font-semibold uppercase tracking-widest transition-all flex items-center justify-center gap-2"
-                                            >
-                                                <ArrowLeft size={16} />
-                                                Back
-                                            </button>
-                                            <button
-                                                type="submit"
-                                                className="flex-1 bg-[#A18058] hover:bg-[#8a6a47] text-white py-4 rounded-full text-xs font-semibold uppercase tracking-widest transition-all shadow-xl flex items-center justify-center gap-2 group"
-                                            >
-                                                <CheckCircle size={16} />
-                                                Complete Booking
-                                            </button>
-                                        </div>
+                                    {/* Back Button */}
+                                    <div className="mt-6">
+                                        <button
+                                            type="button"
+                                            onClick={prevStep}
+                                            className="w-full bg-white hover:bg-stone-50 border border-stone-300 text-stone-900 py-4 rounded-full text-xs font-semibold uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <ArrowLeft size={16} />
+                                            Back to Review
+                                        </button>
                                     </div>
-                                </form>
+                                </div>
                             )}
                         </motion.div>
                     </div>
