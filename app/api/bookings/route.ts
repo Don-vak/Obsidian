@@ -20,7 +20,8 @@ export async function POST(request: NextRequest) {
         const { data: blockedDates } = await supabase
             .from('blocked_dates')
             .select('*')
-            .or(`and(start_date.lte.${body.checkOut},end_date.gte.${body.checkIn})`)
+            .lt('start_date', body.checkOut)
+            .gt('end_date', body.checkIn)
 
         if (blockedDates && blockedDates.length > 0) {
             return NextResponse.json({ error: 'Dates are not available' }, { status: 400 })

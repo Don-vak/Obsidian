@@ -28,7 +28,8 @@ export async function POST(request: NextRequest) {
         const { data: blockedDates } = await supabase
             .from('blocked_dates')
             .select('*')
-            .or(`and(start_date.lte.${checkOut},end_date.gte.${checkIn})`)
+            .lt('start_date', checkOut)
+            .gt('end_date', checkIn)
 
         if (blockedDates && blockedDates.length > 0) {
             return NextResponse.json(

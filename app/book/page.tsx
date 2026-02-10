@@ -180,6 +180,13 @@ export default function BookingPage() {
 
     const prevStep = () => {
         if (currentStep > 0) {
+            // If going back from payment step, clear the payment intent
+            // This ensures a fresh payment intent is created when returning
+            if (currentStep === 3) {
+                setClientSecret('');
+                setPaymentIntentId('');
+                setPaymentError('');
+            }
             setCurrentStep(currentStep - 1);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }

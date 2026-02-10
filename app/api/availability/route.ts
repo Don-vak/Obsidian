@@ -14,10 +14,13 @@ export async function GET(request: NextRequest) {
         const supabase = await createServerSupabaseClient()
 
         // Check for overlapping blocked dates
+        // A true overlap exists when: start_date < checkOut AND end_date > checkIn
+        // This allows checkout on the same day as next checkin
         const { data: blockedDates, error } = await supabase
             .from('blocked_dates')
             .select('*')
-            .or(`and(start_date.lte.${checkOut},end_date.gte.${checkIn})`)
+            .lt('start_date', checkOut)
+            .gt('end_date', checkIn)
 
         if (error) {
             console.error('Error checking availability:', error)

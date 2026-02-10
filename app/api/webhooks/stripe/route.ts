@@ -75,21 +75,62 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
         return
     }
 
-    // Generate booking number
-    const bookingNumber = `OBS-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`
+    // Calculate nights
+    const checkInDate = new Date(metadata.checkIn)
+    const checkOutDate = new Date(metadata.checkOut)
+    const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24))
+
+    // Get pricing config to calculate breakdown
+    const { data: config } = await supabase
+        .from('pricing_config')
+        .select('*')
+        .lte('effective_from', new Date().toISOString().split('T')[0])
+        .or(`effective_to.is.null,effective_to.gte.${new Date().toISOString().split('T')[0]}`)
+        .order('effective_from', { ascending: false })
+        .limit(1)
+        .single()
+
+    if (!config) {
+        throw new Error('Pricing config not found')
+    }
+
+    // Calculate pricing breakdown
+    const nightly_rate = Number(config.base_nightly_rate)
+    const subtotal = nightly_rate * nights
+    let discount = 0
+    if (nights >= 28) {
+        discount = subtotal * (Number(config.monthly_discount_percentage) / 100)
+    } else if (nights >= 7) {
+        discount = subtotal * (Number(config.weekly_discount_percentage) / 100)
+    }
+
+    const discountedSubtotal = subtotal - discount
+    const cleaning_fee = Number(config.cleaning_fee)
+    const service_fee = discountedSubtotal * (Number(config.service_fee_percentage) / 100)
+    const tax_amount = (discountedSubtotal + service_fee + cleaning_fee) * (Number(config.tax_percentage) / 100)
+    const total = discountedSubtotal + cleaning_fee + service_fee + tax_amount
 
     // Create booking
     const { data: booking, error: bookingError } = await supabase
         .from('bookings')
         .insert({
-            booking_number: bookingNumber,
-            check_in_date: metadata.checkIn,
-            check_out_date: metadata.checkOut,
-            number_of_guests: parseInt(metadata.guests),
+            check_in: metadata.checkIn,
+            check_out: metadata.checkOut,
+            nights,
+            guest_count: parseInt(metadata.guests),
             guest_name: metadata.guestName,
             guest_email: metadata.guestEmail,
-            guest_phone: metadata.guestPhone || null,
-            total_amount: paymentIntent.amount / 100, // Convert from cents
+            guest_phone: metadata.guestPhone || '',
+            special_requests: metadata.specialRequests || null,
+            nightly_rate: Number(nightly_rate.toFixed(2)),
+            subtotal: Number(subtotal.toFixed(2)),
+            discount: Number(discount.toFixed(2)),
+            cleaning_fee: Number(cleaning_fee.toFixed(2)),
+            service_fee: Number(service_fee.toFixed(2)),
+            tax_amount: Number(tax_amount.toFixed(2)),
+            total: Number(total.toFixed(2)),
+            agreed_to_house_rules: true,
+            agreed_to_cancellation_policy: true,
             stripe_payment_intent_id: paymentIntent.id,
             stripe_payment_status: 'paid',
             paid_at: new Date().toISOString(),
