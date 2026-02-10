@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import PageTransition from "@/components/PageTransition";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -37,7 +38,9 @@ export default function RootLayout({
         <html lang="en" className="scroll-smooth">
             <body className={`${inter.variable} ${playfair.variable} antialiased selection:bg-[#A18058] selection:text-white font-sans`} suppressHydrationWarning>
                 <Navbar />
-                <main>{children}</main>
+                <PageTransition>
+                    <main>{children}</main>
+                </PageTransition>
                 <Footer />
             </body>
         </html>

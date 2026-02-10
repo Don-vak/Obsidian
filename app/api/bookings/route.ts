@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { retrySupabaseQuery } from '@/lib/supabase/retry'
 
 // POST /api/bookings - Create a new booking
 export async function POST(request: NextRequest) {
@@ -16,29 +17,38 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Invalid date range' }, { status: 400 })
         }
 
-        // Check availability first
-        const { data: blockedDates } = await supabase
-            .from('blocked_dates')
-            .select('*')
-            .lt('start_date', body.checkOut)
-            .gt('end_date', body.checkIn)
+        // Check availability first (with retry)
+        const { data: blockedDates } = await retrySupabaseQuery(
+            () => supabase
+                .from('blocked_dates')
+                .select('*')
+                .lt('start_date', body.checkOut)
+                .gt('end_date', body.checkIn),
+            'check-booking-availability'
+        )
 
         if (blockedDates && blockedDates.length > 0) {
             return NextResponse.json({ error: 'Dates are not available' }, { status: 400 })
         }
 
-        // Get current pricing config
-        const { data: config, error: configError } = await supabase
-            .from('pricing_config')
-            .select('*')
-            .lte('effective_from', new Date().toISOString().split('T')[0])
-            .or(`effective_to.is.null,effective_to.gte.${new Date().toISOString().split('T')[0]}`)
-            .order('effective_from', { ascending: false })
-            .limit(1)
-            .single()
+        // Get current pricing config (with retry)
+        const { data: config, error: configError } = await retrySupabaseQuery(
+            () => supabase
+                .from('pricing_config')
+                .select('*')
+                .lte('effective_from', new Date().toISOString().split('T')[0])
+                .or(`effective_to.is.null,effective_to.gte.${new Date().toISOString().split('T')[0]}`)
+                .order('effective_from', { ascending: false })
+                .limit(1)
+                .single(),
+            'fetch-booking-pricing'
+        )
 
         if (configError || !config) {
-            return NextResponse.json({ error: 'Pricing config not found' }, { status: 500 })
+            return NextResponse.json(
+                { error: 'Service temporarily unavailable. Please try again.', retryable: true },
+                { status: 503 }
+            )
         }
 
         // Calculate pricing (server-side for security)
@@ -55,55 +65,61 @@ export async function POST(request: NextRequest) {
         const taxAmount = (discountedSubtotal + serviceFee + Number(config.cleaning_fee)) * (Number(config.tax_percentage) / 100)
         const total = discountedSubtotal + Number(config.cleaning_fee) + serviceFee + taxAmount
 
-        // Create booking
-        const { data: booking, error: bookingError } = await supabase
-            .from('bookings')
-            .insert({
-                check_in: body.checkIn,
-                check_out: body.checkOut,
-                nights,
-                guest_count: body.guestCount,
-                guest_name: body.guestName,
-                guest_email: body.guestEmail,
-                guest_phone: body.guestPhone,
-                special_requests: body.specialRequests || null,
-                nightly_rate: Number(config.base_nightly_rate),
-                subtotal: Number(subtotal.toFixed(2)),
-                discount: Number(discount.toFixed(2)),
-                cleaning_fee: Number(config.cleaning_fee),
-                service_fee: Number(serviceFee.toFixed(2)),
-                tax_amount: Number(taxAmount.toFixed(2)),
-                total: Number(total.toFixed(2)),
-                agreed_to_house_rules: body.agreeToHouseRules,
-                agreed_to_cancellation_policy: body.agreeToCancellationPolicy,
-                status: 'pending',
-                payment_status: 'pending'
-            })
-            .select()
-            .single()
+        // Create booking (with retry)
+        const { data: booking, error: bookingError } = await retrySupabaseQuery(
+            () => supabase
+                .from('bookings')
+                .insert({
+                    check_in: body.checkIn,
+                    check_out: body.checkOut,
+                    nights,
+                    guest_count: body.guestCount,
+                    guest_name: body.guestName,
+                    guest_email: body.guestEmail,
+                    guest_phone: body.guestPhone,
+                    special_requests: body.specialRequests || null,
+                    nightly_rate: Number(config.base_nightly_rate),
+                    subtotal: Number(subtotal.toFixed(2)),
+                    discount: Number(discount.toFixed(2)),
+                    cleaning_fee: Number(config.cleaning_fee),
+                    service_fee: Number(serviceFee.toFixed(2)),
+                    tax_amount: Number(taxAmount.toFixed(2)),
+                    total: Number(total.toFixed(2)),
+                    agreed_to_house_rules: body.agreeToHouseRules,
+                    agreed_to_cancellation_policy: body.agreeToCancellationPolicy,
+                    status: 'pending',
+                    payment_status: 'pending'
+                })
+                .select()
+                .single(),
+            'create-booking'
+        )
 
         if (bookingError) {
             console.error('Error creating booking:', bookingError)
-            return NextResponse.json({ error: bookingError.message }, { status: 500 })
+            return NextResponse.json(
+                { error: 'Service temporarily unavailable. Please try again.', retryable: true },
+                { status: 503 }
+            )
         }
 
         // Create blocked date entry
-        const { error: blockedError } = await supabase
-            .from('blocked_dates')
-            .insert({
-                start_date: body.checkIn,
-                end_date: body.checkOut,
-                reason: 'booked',
-                booking_id: booking.id
-            })
+        const { error: blockedError } = await retrySupabaseQuery(
+            () => supabase
+                .from('blocked_dates')
+                .insert({
+                    start_date: body.checkIn,
+                    end_date: body.checkOut,
+                    reason: 'booked',
+                    booking_id: booking.id
+                }),
+            'create-blocked-date'
+        )
 
         if (blockedError) {
             console.error('Error creating blocked date:', blockedError)
             // Don't fail the booking, just log the error
         }
-
-        // TODO: Create Stripe payment intent
-        // TODO: Send confirmation email
 
         return NextResponse.json({
             success: true,
@@ -111,12 +127,15 @@ export async function POST(request: NextRequest) {
             message: 'Booking created successfully'
         })
     } catch (error) {
-        console.error('Unexpected error:', error)
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+        console.error('Error creating booking:', error)
+        return NextResponse.json(
+            { error: 'Service temporarily unavailable. Please try again.', retryable: true },
+            { status: 503 }
+        )
     }
 }
 
-// GET /api/bookings/:id - Get booking by ID (will be implemented as dynamic route)
+// GET /api/bookings - Get booking by ID or booking number
 export async function GET(request: NextRequest) {
     try {
         const searchParams = request.nextUrl.searchParams
@@ -137,7 +156,10 @@ export async function GET(request: NextRequest) {
             query = query.eq('booking_number', bookingNumber)
         }
 
-        const { data, error } = await query.single()
+        const { data, error } = await retrySupabaseQuery(
+            () => query.single(),
+            'fetch-booking'
+        )
 
         if (error) {
             console.error('Error fetching booking:', error)
@@ -146,7 +168,10 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json(data)
     } catch (error) {
-        console.error('Unexpected error:', error)
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+        console.error('Error fetching booking:', error)
+        return NextResponse.json(
+            { error: 'Service temporarily unavailable. Please try again.', retryable: true },
+            { status: 503 }
+        )
     }
 }

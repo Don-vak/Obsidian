@@ -160,6 +160,20 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
     }
 
     console.log('Booking created successfully:', booking.booking_number)
+
+    // Send email notifications (non-blocking)
+    try {
+        const { sendBookingConfirmation, sendAdminBookingNotification } = await import('@/lib/email/send')
+
+        // Send confirmation to guest
+        await sendBookingConfirmation(booking)
+
+        // Send notification to admin
+        await sendAdminBookingNotification(booking)
+    } catch (emailError) {
+        console.error('Error sending emails:', emailError)
+        // Don't throw - booking succeeded, email is secondary
+    }
 }
 
 async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {

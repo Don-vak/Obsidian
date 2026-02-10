@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { retrySupabaseQuery } from '@/lib/supabase/retry'
 
 export async function POST(request: NextRequest) {
     try {
@@ -11,33 +12,49 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
         }
 
-        // Create contact submission
-        const { data, error } = await supabase
-            .from('contact_submissions')
-            .insert({
-                name: body.name,
-                email: body.email,
-                phone: body.phone || null,
-                subject: body.subject,
-                message: body.message,
-                status: 'new'
-            })
-            .select()
-            .single()
+        // Create contact submission with retry
+        const { data, error } = await retrySupabaseQuery(
+            () => supabase
+                .from('contact_submissions')
+                .insert({
+                    name: body.name,
+                    email: body.email,
+                    phone: body.phone || null,
+                    subject: body.subject,
+                    message: body.message,
+                    status: 'new'
+                })
+                .select()
+                .single(),
+            'create-contact-submission'
+        )
 
         if (error) {
             console.error('Error creating contact submission:', error)
-            return NextResponse.json({ error: error.message }, { status: 500 })
+            return NextResponse.json(
+                { error: 'Service temporarily unavailable. Please try again.', retryable: true },
+                { status: 503 }
+            )
         }
 
-        // TODO: Send notification email to admin
+        // Send notification email to admin (non-blocking)
+        try {
+            const { sendContactFormNotification } = await import('@/lib/email/send')
+            await sendContactFormNotification(data)
+        } catch (emailError) {
+            console.error('Error sending contact form notification:', emailError)
+            // Don't throw - submission succeeded, email is secondary
+        }
 
         return NextResponse.json({
             success: true,
             message: 'Thank you for your message. We will get back to you soon!'
         })
     } catch (error) {
-        console.error('Unexpected error:', error)
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+        console.error('Error submitting contact form:', error)
+        return NextResponse.json(
+            { error: 'Service temporarily unavailable. Please try again.', retryable: true },
+            { status: 503 }
+        )
     }
 }

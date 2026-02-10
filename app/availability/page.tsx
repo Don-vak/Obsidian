@@ -21,22 +21,45 @@ export default function AvailabilityPage() {
     const [pricing, setPricing] = useState<PricingBreakdown | null>(null);
     const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
     const [isLoadingDates, setIsLoadingDates] = useState(true);
+    const [fetchError, setFetchError] = useState<string | null>(null);
 
-    // Fetch blocked dates from API
-    useEffect(() => {
-        async function fetchBlockedDates() {
-            try {
-                const response = await fetch('/api/blocked-dates');
-                const data = await response.json();
-                if (response.ok) {
-                    setBlockedDates(data);
-                }
-            } catch (error) {
-                console.error('Error fetching blocked dates:', error);
-            } finally {
-                setIsLoadingDates(false);
+    // Fetch blocked dates from API with auto-retry
+    const fetchBlockedDates = async (retryCount = 0) => {
+        const MAX_RETRIES = 3;
+        setIsLoadingDates(true);
+        setFetchError(null);
+
+        try {
+            const response = await fetch('/api/blocked-dates');
+            const data = await response.json();
+
+            if (response.ok) {
+                setBlockedDates(data);
+                setFetchError(null);
+            } else if (data.retryable && retryCount < MAX_RETRIES) {
+                // Auto-retry with exponential backoff
+                const delay = Math.min(1000 * Math.pow(2, retryCount), 8000);
+                console.warn(`[Retry] Blocked dates fetch failed, retrying in ${delay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+                return fetchBlockedDates(retryCount + 1);
+            } else {
+                setFetchError('Unable to load calendar data. Please try again.');
             }
+        } catch (error) {
+            console.error('Error fetching blocked dates:', error);
+            if (retryCount < MAX_RETRIES) {
+                const delay = Math.min(1000 * Math.pow(2, retryCount), 8000);
+                console.warn(`[Retry] Network error, retrying in ${delay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+                return fetchBlockedDates(retryCount + 1);
+            }
+            setFetchError('Connection issue. Please check your internet and try again.');
+        } finally {
+            setIsLoadingDates(false);
         }
+    };
+
+    useEffect(() => {
         fetchBlockedDates();
     }, []);
 
@@ -158,18 +181,56 @@ export default function AvailabilityPage() {
                             transition={{ delay: 0.3 }}
                             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
                         >
-                            {months.map((month, index) => (
-                                <CalendarMonth
-                                    key={index}
-                                    month={month}
-                                    selectedStart={selectedStart}
-                                    selectedEnd={selectedEnd}
-                                    blockedDates={blockedDates}
-                                    onDateClick={handleDateClick}
-                                    onHoverDate={setHoveredDate}
-                                    hoveredDate={hoveredDate}
-                                />
-                            ))}
+                            {isLoadingDates ? (
+                                // Show skeleton loaders while loading
+                                <>
+                                    {[0, 1, 2].map((i) => (
+                                        <div key={i} className="bg-white rounded-2xl p-6 shadow-sm">
+                                            <div className="animate-pulse space-y-4">
+                                                <div className="h-6 bg-stone-200 rounded w-1/2 mx-auto" />
+                                                <div className="grid grid-cols-7 gap-2">
+                                                    {Array.from({ length: 35 }).map((_, j) => (
+                                                        <div key={j} className="h-10 bg-stone-200 rounded" />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </>
+                            ) : fetchError ? (
+                                // Show error state with retry button
+                                <div className="col-span-full flex flex-col items-center justify-center py-16 px-8">
+                                    <div className="w-16 h-16 rounded-full bg-amber-50 flex items-center justify-center mb-6">
+                                        <svg className="w-8 h-8 text-[#A18058]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                                        </svg>
+                                    </div>
+                                    <p className="text-stone-700 text-lg font-light mb-2 text-center">{fetchError}</p>
+                                    <p className="text-stone-500 text-sm font-light mb-6 text-center">
+                                        Our servers are experiencing a temporary delay.
+                                    </p>
+                                    <button
+                                        onClick={() => fetchBlockedDates()}
+                                        className="px-6 py-3 bg-[#A18058] text-white rounded-xl hover:bg-[#8B6A47] transition-all duration-300 text-sm font-medium tracking-wide shadow-md hover:shadow-lg"
+                                    >
+                                        Try Again
+                                    </button>
+                                </div>
+                            ) : (
+                                // Show actual calendars when loaded
+                                months.map((month, index) => (
+                                    <CalendarMonth
+                                        key={index}
+                                        month={month}
+                                        selectedStart={selectedStart}
+                                        selectedEnd={selectedEnd}
+                                        blockedDates={blockedDates}
+                                        onDateClick={handleDateClick}
+                                        onHoverDate={setHoveredDate}
+                                        hoveredDate={hoveredDate}
+                                    />
+                                ))
+                            )}
                         </motion.div>
 
                         {/* Legend */}

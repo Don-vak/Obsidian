@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { retrySupabaseQuery } from '@/lib/supabase/retry'
 
 export async function GET(request: NextRequest) {
     try {
@@ -16,15 +17,21 @@ export async function GET(request: NextRequest) {
         // Check for overlapping blocked dates
         // A true overlap exists when: start_date < checkOut AND end_date > checkIn
         // This allows checkout on the same day as next checkin
-        const { data: blockedDates, error } = await supabase
-            .from('blocked_dates')
-            .select('*')
-            .lt('start_date', checkOut)
-            .gt('end_date', checkIn)
+        const { data: blockedDates, error } = await retrySupabaseQuery(
+            () => supabase
+                .from('blocked_dates')
+                .select('*')
+                .lt('start_date', checkOut)
+                .gt('end_date', checkIn),
+            'check-availability'
+        )
 
         if (error) {
             console.error('Error checking availability:', error)
-            return NextResponse.json({ error: error.message }, { status: 500 })
+            return NextResponse.json(
+                { error: 'Service temporarily unavailable. Please try again.', retryable: true },
+                { status: 503 }
+            )
         }
 
         if (blockedDates && blockedDates.length > 0) {
@@ -40,7 +47,10 @@ export async function GET(request: NextRequest) {
             message: 'These dates are available!'
         })
     } catch (error) {
-        console.error('Unexpected error:', error)
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+        console.error('Error checking availability:', error)
+        return NextResponse.json(
+            { error: 'Service temporarily unavailable. Please try again.', retryable: true },
+            { status: 503 }
+        )
     }
 }
