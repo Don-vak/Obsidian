@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { retrySupabaseQuery } from '@/lib/supabase/retry'
+import { resilientQuery, CACHE_TTL } from '@/lib/supabase/resilient'
 
 export async function GET() {
     try {
         const supabase = await createServerSupabaseClient()
 
-        const { data, error } = await retrySupabaseQuery(
+        // Pricing config changes rarely — use longer cache
+        const { data, error, fromCache } = await resilientQuery(
+            'pricing-config',
             () => supabase
                 .from('pricing_config')
                 .select('*')
@@ -15,18 +17,21 @@ export async function GET() {
                 .order('effective_from', { ascending: false })
                 .limit(1)
                 .single(),
-            'fetch-pricing-config'
+            'fetch-pricing-config',
+            { cacheTTL: CACHE_TTL.LONG }
         )
 
         if (error) {
             console.error('Error fetching pricing config:', error)
             return NextResponse.json(
-                { error: 'Service temporarily unavailable. Please try again.', retryable: true },
+                { error: error.message || 'Service temporarily unavailable.', retryable: true },
                 { status: 503 }
             )
         }
 
-        return NextResponse.json(data)
+        return NextResponse.json(data, {
+            headers: fromCache ? { 'X-Cache': 'HIT' } : { 'X-Cache': 'MISS' },
+        })
     } catch (error) {
         console.error('Error fetching pricing config:', error)
         return NextResponse.json(

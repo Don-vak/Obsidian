@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { retrySupabaseQuery } from '@/lib/supabase/retry'
+import { resilientQuery } from '@/lib/supabase/resilient'
 
 export async function POST(request: NextRequest) {
     try {
@@ -12,8 +12,9 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
         }
 
-        // Create contact submission with retry
-        const { data, error } = await retrySupabaseQuery(
+        // Create contact submission with resilience (no caching for writes)
+        const { data, error } = await resilientQuery(
+            `contact:${Date.now()}`,
             () => supabase
                 .from('contact_submissions')
                 .insert({
@@ -26,7 +27,8 @@ export async function POST(request: NextRequest) {
                 })
                 .select()
                 .single(),
-            'create-contact-submission'
+            'create-contact-submission',
+            { cacheTTL: 0 } // No caching for writes
         )
 
         if (error) {
@@ -40,10 +42,9 @@ export async function POST(request: NextRequest) {
         // Send notification email to admin (non-blocking)
         try {
             const { sendContactFormNotification } = await import('@/lib/email/send')
-            await sendContactFormNotification(data)
+            await sendContactFormNotification(data as Record<string, string>)
         } catch (emailError) {
             console.error('Error sending contact form notification:', emailError)
-            // Don't throw - submission succeeded, email is secondary
         }
 
         return NextResponse.json({

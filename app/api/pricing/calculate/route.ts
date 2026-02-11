@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { retrySupabaseQuery } from '@/lib/supabase/retry'
+import { resilientQuery, CACHE_TTL } from '@/lib/supabase/resilient'
 
 export async function GET(request: NextRequest) {
     try {
@@ -13,8 +13,9 @@ export async function GET(request: NextRequest) {
 
         const supabase = await createServerSupabaseClient()
 
-        // Get current pricing config with retry
-        const { data: config, error } = await retrySupabaseQuery(
+        // Pricing config changes rarely — use longer cache
+        const { data: config, error } = await resilientQuery(
+            'pricing-config',
             () => supabase
                 .from('pricing_config')
                 .select('*')
@@ -23,38 +24,40 @@ export async function GET(request: NextRequest) {
                 .order('effective_from', { ascending: false })
                 .limit(1)
                 .single(),
-            'fetch-pricing-config'
+            'fetch-pricing-config',
+            { cacheTTL: CACHE_TTL.LONG }
         )
 
         if (error || !config) {
             console.error('Error fetching pricing config:', error)
             return NextResponse.json(
-                { error: 'Service temporarily unavailable. Please try again.', retryable: true },
+                { error: error?.message || 'Service temporarily unavailable.', retryable: true },
                 { status: 503 }
             )
         }
 
         // Calculate pricing
-        const subtotal = Number(config.base_nightly_rate) * nights
+        const cfg = config as Record<string, number>
+        const subtotal = Number(cfg.base_nightly_rate) * nights
 
         let discount = 0
         if (nights >= 28) {
-            discount = subtotal * (Number(config.monthly_discount_percentage) / 100)
+            discount = subtotal * (Number(cfg.monthly_discount_percentage) / 100)
         } else if (nights >= 7) {
-            discount = subtotal * (Number(config.weekly_discount_percentage) / 100)
+            discount = subtotal * (Number(cfg.weekly_discount_percentage) / 100)
         }
 
         const discountedSubtotal = subtotal - discount
-        const serviceFee = discountedSubtotal * (Number(config.service_fee_percentage) / 100)
-        const taxAmount = (discountedSubtotal + serviceFee + Number(config.cleaning_fee)) * (Number(config.tax_percentage) / 100)
-        const total = discountedSubtotal + Number(config.cleaning_fee) + serviceFee + taxAmount
+        const serviceFee = discountedSubtotal * (Number(cfg.service_fee_percentage) / 100)
+        const taxAmount = (discountedSubtotal + serviceFee + Number(cfg.cleaning_fee)) * (Number(cfg.tax_percentage) / 100)
+        const total = discountedSubtotal + Number(cfg.cleaning_fee) + serviceFee + taxAmount
 
         return NextResponse.json({
             nights,
-            nightlyRate: Number(config.base_nightly_rate),
+            nightlyRate: Number(cfg.base_nightly_rate),
             subtotal: Number(subtotal.toFixed(2)),
             discount: Number(discount.toFixed(2)),
-            cleaningFee: Number(config.cleaning_fee),
+            cleaningFee: Number(cfg.cleaning_fee),
             serviceFee: Number(serviceFee.toFixed(2)),
             taxAmount: Number(taxAmount.toFixed(2)),
             total: Number(total.toFixed(2))

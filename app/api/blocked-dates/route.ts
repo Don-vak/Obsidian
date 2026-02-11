@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { retrySupabaseQuery } from '@/lib/supabase/retry'
+import { resilientQuery, CACHE_TTL } from '@/lib/supabase/resilient'
 
 export async function GET(request: NextRequest) {
     try {
@@ -9,44 +9,52 @@ export async function GET(request: NextRequest) {
 
         const supabase = await createServerSupabaseClient()
 
-        let query = supabase
-            .from('blocked_dates')
-            .select('*')
-            .order('start_date', { ascending: true })
+        // Build cache key based on month filter
+        const cacheKey = month ? `blocked-dates:${month}` : 'blocked-dates:all'
 
-        // Filter by month if provided
-        if (month) {
-            const startOfMonth = `${month}-01`
-            const endOfMonth = new Date(new Date(startOfMonth).getFullYear(), new Date(startOfMonth).getMonth() + 1, 0)
-                .toISOString()
-                .split('T')[0]
+        const { data, error, fromCache } = await resilientQuery(
+            cacheKey,
+            () => {
+                let query = supabase
+                    .from('blocked_dates')
+                    .select('*')
+                    .order('start_date', { ascending: true })
 
-            query = query
-                .gte('start_date', startOfMonth)
-                .lte('end_date', endOfMonth)
-        }
+                if (month) {
+                    const startOfMonth = `${month}-01`
+                    const endOfMonth = new Date(new Date(startOfMonth).getFullYear(), new Date(startOfMonth).getMonth() + 1, 0)
+                        .toISOString()
+                        .split('T')[0]
 
-        const { data, error } = await retrySupabaseQuery(
-            () => query,
-            'fetch-blocked-dates'
+                    query = query
+                        .gte('start_date', startOfMonth)
+                        .lte('end_date', endOfMonth)
+                }
+
+                return query
+            },
+            'fetch-blocked-dates',
+            { cacheTTL: CACHE_TTL.MEDIUM }
         )
 
         if (error) {
             console.error('Error fetching blocked dates:', error)
             return NextResponse.json(
-                { error: 'Service temporarily unavailable. Please try again.', retryable: true },
+                { error: error.message || 'Service temporarily unavailable.', retryable: true },
                 { status: 503 }
             )
         }
 
         // Map database fields to calendar component format
-        const blockedDates = (data || []).map(item => ({
+        const blockedDates = (Array.isArray(data) ? data : []).map((item: Record<string, string>) => ({
             start: item.start_date,
             end: item.end_date,
             reason: item.reason
         }))
 
-        return NextResponse.json(blockedDates)
+        return NextResponse.json(blockedDates, {
+            headers: fromCache ? { 'X-Cache': 'HIT' } : { 'X-Cache': 'MISS' },
+        })
     } catch (error) {
         console.error('Error fetching blocked dates:', error)
         return NextResponse.json(

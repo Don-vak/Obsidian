@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { retrySupabaseQuery } from '@/lib/supabase/retry'
+import { resilientQuery, CACHE_TTL } from '@/lib/supabase/resilient'
 
 export async function GET(request: NextRequest) {
     try {
@@ -14,27 +14,29 @@ export async function GET(request: NextRequest) {
 
         const supabase = await createServerSupabaseClient()
 
-        // Check for overlapping blocked dates
-        // A true overlap exists when: start_date < checkOut AND end_date > checkIn
-        // This allows checkout on the same day as next checkin
-        const { data: blockedDates, error } = await retrySupabaseQuery(
+        // Short cache for availability checks (same dates queried repeatedly)
+        const cacheKey = `availability:${checkIn}:${checkOut}`
+
+        const { data: blockedDates, error } = await resilientQuery(
+            cacheKey,
             () => supabase
                 .from('blocked_dates')
                 .select('*')
                 .lt('start_date', checkOut)
                 .gt('end_date', checkIn),
-            'check-availability'
+            'check-availability',
+            { cacheTTL: CACHE_TTL.SHORT }
         )
 
         if (error) {
             console.error('Error checking availability:', error)
             return NextResponse.json(
-                { error: 'Service temporarily unavailable. Please try again.', retryable: true },
+                { error: error.message || 'Service temporarily unavailable.', retryable: true },
                 { status: 503 }
             )
         }
 
-        if (blockedDates && blockedDates.length > 0) {
+        if (Array.isArray(blockedDates) && blockedDates.length > 0) {
             const reason = blockedDates[0].reason
             return NextResponse.json({
                 available: false,
