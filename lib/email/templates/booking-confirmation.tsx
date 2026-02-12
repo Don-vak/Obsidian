@@ -222,12 +222,69 @@ export function BookingConfirmationEmail(props: BookingConfirmationEmailProps): 
             Check-out time is 11:00 AM.
         </div>
 
-        <div class="info-box">
-            <strong>📋 House Rules Reminder:</strong><br>
-            • Maximum ${guestCount} guests<br>
-            • No smoking inside the property<br>
-            • No parties or events<br>
-            • Respect quiet hours (10 PM - 8 AM)
+        <div class="section">
+            <div class="section-title">🏠 House Rules</div>
+            <p style="color: #78716C; font-size: 14px; margin-bottom: 20px;">
+                Please review the following rules to ensure a wonderful stay for you and our community.
+            </p>
+
+            <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 16px; background-color: #FAFAF9; border-radius: 8px 8px 0 0; border-bottom: 1px solid #E7E5E4;">
+                        <strong style="color: #A18058;">🕓 Check-in &amp; Check-out</strong>
+                        <p style="margin: 8px 0 0; color: #57534E; font-size: 14px; line-height: 1.5;">
+                            Check-in is from 4:00 PM. Check-out is by 11:00 AM.<br>
+                            Early check-in or late check-out may be available upon request.
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 16px; background-color: #FAFAF9; border-bottom: 1px solid #E7E5E4;">
+                        <strong style="color: #A18058;">🔇 Quiet Hours</strong>
+                        <p style="margin: 8px 0 0; color: #57534E; font-size: 14px; line-height: 1.5;">
+                            To respect our neighbors and the serenity of the canyon, quiet hours are strictly enforced between <strong>10:00 PM and 8:00 AM</strong>.
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 16px; background-color: #FAFAF9; border-bottom: 1px solid #E7E5E4;">
+                        <strong style="color: #A18058;">🚭 No Smoking</strong>
+                        <p style="margin: 8px 0 0; color: #57534E; font-size: 14px; line-height: 1.5;">
+                            The Obsidian is a non-smoking property. This includes outdoor decks and pool areas due to high fire risk in the hills.
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 16px; background-color: #FAFAF9; border-bottom: 1px solid #E7E5E4;">
+                        <strong style="color: #A18058;">👥 Occupancy</strong>
+                        <p style="margin: 8px 0 0; color: #57534E; font-size: 14px; line-height: 1.5;">
+                            Maximum occupancy is <strong>${guestCount} guests</strong> (as per your reservation). No unregistered guests or parties are permitted without prior written approval.
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 16px; background-color: #FAFAF9; border-bottom: 1px solid #E7E5E4;">
+                        <strong style="color: #A18058;">🐾 Pets</strong>
+                        <p style="margin: 8px 0 0; color: #57534E; font-size: 14px; line-height: 1.5;">
+                            Pets are not permitted at the property. Service animals are welcome with advance notice.
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 16px; background-color: #FAFAF9; border-radius: 0 0 8px 8px;">
+                        <strong style="color: #A18058;">🏊 Pool &amp; Amenities</strong>
+                        <p style="margin: 8px 0 0; color: #57534E; font-size: 14px; line-height: 1.5;">
+                            Please use the infinity pool, hot tub, and outdoor areas at your own risk. No glass containers near the pool. Towels are provided.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+            <div style="background-color: #1C1917; border-radius: 8px; padding: 16px; margin-top: 16px; text-align: center;">
+                <p style="color: #A8A29E; font-size: 13px; margin: 0; line-height: 1.5;">
+                    By confirming this reservation, you agree to abide by these rules. Failure to comply may result in immediate cancellation without refund.
+                </p>
+            </div>
         </div>
 
         <div class="footer">

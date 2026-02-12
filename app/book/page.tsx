@@ -153,6 +153,7 @@ export default function BookingPage() {
                             guestName: formData.guestName,
                             guestEmail: formData.guestEmail,
                             guestPhone: formData.guestPhone,
+                            specialRequests: formData.specialRequests || '',
                         }),
                     });
 

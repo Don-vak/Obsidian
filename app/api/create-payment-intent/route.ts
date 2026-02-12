@@ -11,7 +11,9 @@ export async function POST(request: NextRequest) {
             guests,
             totalAmount,
             guestName,
-            guestEmail
+            guestEmail,
+            guestPhone,
+            specialRequests
         } = body
 
         // Validate required fields
@@ -51,6 +53,8 @@ export async function POST(request: NextRequest) {
                 guests: guests.toString(),
                 guestName,
                 guestEmail,
+                guestPhone: guestPhone || '',
+                specialRequests: specialRequests || '',
             },
         })
 
