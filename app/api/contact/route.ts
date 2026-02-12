@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
         // Send notification email to admin (non-blocking)
         try {
             const { sendContactFormNotification } = await import('@/lib/email/send')
-            await sendContactFormNotification(data as Record<string, string>)
+            await sendContactFormNotification(data as any)
         } catch (emailError) {
             console.error('Error sending contact form notification:', emailError)
         }

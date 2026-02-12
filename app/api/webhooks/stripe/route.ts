@@ -45,6 +45,14 @@ export async function POST(request: NextRequest) {
                 await handleRefund(event.data.object as Stripe.Charge)
                 break
 
+            case 'identity.verification_session.verified':
+                await handleIdentityVerified(event.data.object)
+                break
+
+            case 'identity.verification_session.requires_input':
+                console.log('Identity verification requires additional input:', (event.data.object as any).id)
+                break
+
             default:
                 console.log(`Unhandled event type: ${event.type}`)
         }
@@ -135,6 +143,11 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
             stripe_payment_status: 'paid',
             paid_at: new Date().toISOString(),
             status: 'confirmed',
+            trip_purpose: metadata.tripPurpose || null,
+            arrival_time: metadata.arrivalTime || null,
+            identity_verified: metadata.identityVerified === 'true',
+            verification_session_id: metadata.verificationSessionId || null,
+            agreed_to_rental_agreement: true,
         })
         .select()
         .single()
@@ -203,4 +216,16 @@ async function handleRefund(charge: Stripe.Charge) {
             status: 'cancelled',
         })
         .eq('stripe_payment_intent_id', charge.payment_intent as string)
+}
+
+async function handleIdentityVerified(session: any) {
+    console.log('Identity verification completed:', session.id)
+
+    // Log verification details for admin review
+    const verifiedOutputs = session.verified_outputs || {}
+    console.log('Verified outputs:', {
+        firstName: verifiedOutputs.first_name || 'N/A',
+        lastName: verifiedOutputs.last_name || 'N/A',
+        idType: verifiedOutputs.id_number_type || 'N/A',
+    })
 }

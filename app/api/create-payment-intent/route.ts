@@ -13,7 +13,10 @@ export async function POST(request: NextRequest) {
             guestName,
             guestEmail,
             guestPhone,
-            specialRequests
+            specialRequests,
+            tripPurpose,
+            arrivalTime,
+            verificationSessionId
         } = body
 
         // Validate required fields
@@ -40,12 +43,17 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Create Stripe PaymentIntent
+        // Create Stripe PaymentIntent with 3D Secure enforcement
         const paymentIntent = await stripe.paymentIntents.create({
             amount: Math.round(totalAmount * 100), // Convert to cents
             currency: 'usd',
             automatic_payment_methods: {
                 enabled: true,
+            },
+            payment_method_options: {
+                card: {
+                    request_three_d_secure: 'any',
+                },
             },
             metadata: {
                 checkIn,
@@ -55,6 +63,10 @@ export async function POST(request: NextRequest) {
                 guestEmail,
                 guestPhone: guestPhone || '',
                 specialRequests: specialRequests || '',
+                tripPurpose: tripPurpose || '',
+                arrivalTime: arrivalTime || '',
+                verificationSessionId: verificationSessionId || '',
+                identityVerified: verificationSessionId ? 'true' : 'false',
             },
         })
 
