@@ -199,7 +199,7 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                         <div className="space-y-3 mb-6">
                             <div className="flex justify-between text-sm text-stone-600">
                                 <span>Total Amount</span>
-                                <span className="font-medium text-[#1C1917]">${Number(booking.total_amount).toLocaleString()}</span>
+                                <span className="font-medium text-[#1C1917]">${Number(booking.total || 0).toLocaleString()}</span>
                             </div>
                             <div className="flex justify-between text-sm text-stone-600">
                                 <span>Status</span>

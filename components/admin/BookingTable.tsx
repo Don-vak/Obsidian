@@ -10,7 +10,7 @@ interface Booking {
     email: string;
     check_in: string;
     check_out: string;
-    total_amount: number;
+    total: number;
     status: string;
     identity_verified: boolean;
     created_at: string;
@@ -78,7 +78,7 @@ export function BookingTable({ bookings }: { bookings: Booking[] }) {
                             {/* Amount */}
                             <div className="flex items-center gap-2 font-serif text-[#1C1917]">
                                 <DollarSign size={16} className="text-stone-400" />
-                                <span>${Number(booking.total_amount).toLocaleString()}</span>
+                                <span>${Number(booking.total || 0).toLocaleString()}</span>
                             </div>
 
                             {/* Status & Actions */}

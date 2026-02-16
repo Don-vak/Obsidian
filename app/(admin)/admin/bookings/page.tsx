@@ -11,14 +11,15 @@ export const dynamic = 'force-dynamic';
 export default async function BookingsPage({
     searchParams,
 }: {
-    searchParams: { [key: string]: string | string[] | undefined };
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
     const supabase = await createServerSupabaseClient();
+    const resolvedParams = await searchParams;
 
     // Parse filters
-    const page = Number(searchParams.page) || 1;
-    const query = typeof searchParams.q === 'string' ? searchParams.q : '';
-    const status = typeof searchParams.status === 'string' ? searchParams.status : 'all';
+    const page = Number(resolvedParams.page) || 1;
+    const query = typeof resolvedParams.q === 'string' ? resolvedParams.q : '';
+    const status = typeof resolvedParams.status === 'string' ? resolvedParams.status : 'all';
 
     const pageSize = 10;
     const from = (page - 1) * pageSize;
@@ -28,6 +29,7 @@ export default async function BookingsPage({
     let dbQuery = supabase
         .from('bookings')
         .select('*', { count: 'exact' })
+        .neq('status', 'blocked')
         .order('created_at', { ascending: false })
         .range(from, to);
 
@@ -36,7 +38,7 @@ export default async function BookingsPage({
     }
 
     if (query) {
-        dbQuery = dbQuery.or(`guest_name.ilike.%${query}%,email.ilike.%${query}%`);
+        dbQuery = dbQuery.or(`guest_name.ilike.%${query}%,guest_email.ilike.%${query}%`);
     }
 
     const { data: bookings, count, error } = await dbQuery;
