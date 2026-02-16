@@ -6,6 +6,8 @@ import { DollarSign, Percent, Save, Calculator, RefreshCw } from 'lucide-react';
 export function PricingForm() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+    const [errorMessage, setErrorMessage] = useState('');
 
     const [config, setConfig] = useState({
         baseRate: 450,
@@ -23,7 +25,7 @@ export function PricingForm() {
         fetch('/api/admin/pricing')
             .then(res => res.json())
             .then(data => {
-                setConfig(data);
+                if (data.baseRate) setConfig(data);
                 setLoading(false);
             })
             .catch(err => {
@@ -38,18 +40,29 @@ export function PricingForm() {
             ...prev,
             [name]: Number(value)
         }));
+        setSaveStatus('idle');
     };
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
+        setSaveStatus('idle');
+        setErrorMessage('');
         try {
-            await fetch('/api/admin/pricing', {
+            const res = await fetch('/api/admin/pricing', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(config)
             });
-            // Show success toast?
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || 'Failed to save pricing');
+            }
+            setSaveStatus('success');
+            setTimeout(() => setSaveStatus('idle'), 3000);
+        } catch (err: any) {
+            setSaveStatus('error');
+            setErrorMessage(err.message || 'Failed to save');
         } finally {
             setSaving(false);
         }
@@ -79,14 +92,25 @@ export function PricingForm() {
             <form onSubmit={handleSave} className="bg-white rounded-2xl border border-stone-200 shadow-sm p-6 h-fit">
                 <div className="flex items-center justify-between mb-6">
                     <h3 className="font-serif text-lg text-[#1C1917]">Base Configuration</h3>
-                    <button
-                        type="submit"
-                        disabled={saving}
-                        className="flex items-center gap-2 px-4 py-2 bg-[#1C1917] text-white rounded-full text-xs uppercase tracking-widest font-medium hover:bg-[#2C2926] disabled:opacity-50 transition-all"
-                    >
-                        {saving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
-                        Save Changes
-                    </button>
+                    <div className="flex items-center gap-3">
+                        {saveStatus === 'success' && (
+                            <span className="text-xs text-green-600 font-medium animate-fade-in">✓ Saved successfully</span>
+                        )}
+                        {saveStatus === 'error' && (
+                            <span className="text-xs text-red-500 font-medium">{errorMessage}</span>
+                        )}
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs uppercase tracking-widest font-medium transition-all disabled:opacity-50 ${saveStatus === 'success'
+                                    ? 'bg-green-600 text-white hover:bg-green-700'
+                                    : 'bg-[#1C1917] text-white hover:bg-[#2C2926]'
+                                }`}
+                        >
+                            {saving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
+                            {saving ? 'Saving...' : saveStatus === 'success' ? 'Saved!' : 'Save Changes'}
+                        </button>
+                    </div>
                 </div>
 
                 <div className="space-y-6">
