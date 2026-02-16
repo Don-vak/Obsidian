@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Invalid date range' }, { status: 400 })
         }
 
-        // Check availability first (with resilience)
+        // Check availability - blocked_dates table
         const { data: blockedDates } = await resilientQuery(
             `availability:${body.checkIn}:${body.checkOut}`,
             () => supabase
@@ -30,6 +30,23 @@ export async function POST(request: NextRequest) {
         )
 
         if (Array.isArray(blockedDates) && blockedDates.length > 0) {
+            return NextResponse.json({ error: 'Dates are not available' }, { status: 400 })
+        }
+
+        // Also check confirmed bookings directly for consistency
+        const { data: existingBookings } = await resilientQuery(
+            `booking-conflicts:${body.checkIn}:${body.checkOut}`,
+            () => supabase
+                .from('bookings')
+                .select('id')
+                .eq('status', 'confirmed')
+                .lt('check_in', body.checkOut)
+                .gt('check_out', body.checkIn),
+            'check-booking-conflicts',
+            { cacheTTL: CACHE_TTL.SHORT }
+        )
+
+        if (Array.isArray(existingBookings) && existingBookings.length > 0) {
             return NextResponse.json({ error: 'Dates are not available' }, { status: 400 })
         }
 

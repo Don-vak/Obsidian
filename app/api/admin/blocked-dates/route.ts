@@ -11,32 +11,34 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Start and end dates are required' }, { status: 400 });
         }
 
-        // Check for conflicts
-        const { data: conflicts, error: conflictError } = await supabase
+        // Check for booking conflicts
+        const { data: bookingConflicts } = await supabase
             .from('bookings')
             .select('id')
             .or(`and(check_in.lte.${endDate},check_out.gte.${startDate})`)
-            .in('status', ['confirmed', 'blocked']);
+            .in('status', ['confirmed', 'pending']);
 
-        if (conflictError) throw conflictError;
-
-        if (conflicts && conflicts.length > 0) {
-            return NextResponse.json({ error: 'Dates are already booked or blocked' }, { status: 409 });
+        if (bookingConflicts && bookingConflicts.length > 0) {
+            return NextResponse.json({ error: 'These dates overlap with existing bookings' }, { status: 409 });
         }
 
-        // Create blocked "booking"
+        // Check for existing blocked date conflicts
+        const { data: blockConflicts } = await supabase
+            .from('blocked_dates')
+            .select('id')
+            .or(`and(start_date.lte.${endDate},end_date.gte.${startDate})`);
+
+        if (blockConflicts && blockConflicts.length > 0) {
+            return NextResponse.json({ error: 'These dates are already blocked' }, { status: 409 });
+        }
+
+        // Insert into the blocked_dates table (the correct table)
         const { data, error } = await supabase
-            .from('bookings')
+            .from('blocked_dates')
             .insert({
-                check_in: startDate,
-                check_out: endDate,
-                status: 'blocked',
-                guest_name: 'Blocked',
-                guest_email: 'admin@obsidian.com', // Placeholder
-                total_amount: 0,
-                trip_purpose: reason || 'Maintenance/Unavailable',
-                identity_verified: true, // Auto-verify admin blocks
-                agreed_to_rental_agreement: true
+                start_date: startDate,
+                end_date: endDate,
+                reason: reason || 'maintenance'
             })
             .select()
             .single();
@@ -52,11 +54,26 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-    // Basic implementation to unblock
-    // Expecting ID in query param or body? Standard is specialized route [id].
-    // But for simplicity I might handle it here if passed in body, OR assume the plan meant [id].
-    // Plan said: DELETE /api/admin/blocked-dates/[id]
-    // So this file handles POST (collection).
-    // I need route.ts in blocked-dates/[id] for DELETE.
-    return NextResponse.json({ error: 'Method not allowed' }, { status: 405 });
+    try {
+        const supabase = await createServerSupabaseClient();
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get('id');
+
+        if (!id) {
+            return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+        }
+
+        const { error } = await supabase
+            .from('blocked_dates')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        return NextResponse.json({ success: true });
+
+    } catch (error: any) {
+        console.error('Error unblocking dates:', error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
 }
