@@ -7,6 +7,7 @@ import { Key, Menu, ArrowRight } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -17,11 +18,22 @@ export const Navbar: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    const checkUser = async () => {
+      const { createClient } = await import('@/lib/supabase/client');
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) setIsAdmin(true);
+    };
+    checkUser();
+  }, []);
+
   const navLinks = [
     { name: 'Home', href: '/' },
     { name: 'Availability', href: '/availability' },
     { name: 'About', href: '/about' },
     { name: 'Contact', href: '/contact' },
+    ...(isAdmin ? [{ name: 'Dashboard', href: '/admin' }] : []),
   ];
 
   return (
@@ -48,10 +60,10 @@ export const Navbar: React.FC = () => {
                 key={link.name}
                 href={link.href}
                 className={`text-xs font-medium transition-colors uppercase tracking-widest ${isActive
-                    ? 'text-[#A18058]'
-                    : scrolled
-                      ? 'text-stone-500 hover:text-[#A18058]'
-                      : 'text-stone-200 hover:text-[#A18058]'
+                  ? 'text-[#A18058]'
+                  : scrolled
+                    ? 'text-stone-500 hover:text-[#A18058]'
+                    : 'text-stone-200 hover:text-[#A18058]'
                   }`}
               >
                 {link.name}
