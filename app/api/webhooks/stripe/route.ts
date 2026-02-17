@@ -174,6 +174,37 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
 
     console.log('Booking created successfully:', booking.booking_number)
 
+    // Reconcile any deposit hold that was created before the booking existed
+    // (The deposit hold API may run before this webhook creates the booking row)
+    try {
+        const depositHolds = await stripe.paymentIntents.search({
+            query: `metadata["type"]:"security_deposit" AND metadata["booking_payment_intent"]:"${paymentIntent.id}"`,
+        })
+
+        if (depositHolds.data.length > 0) {
+            const depositIntent = depositHolds.data[0]
+            const depositStatus = depositIntent.status === 'requires_capture' ? 'held'
+                : depositIntent.status === 'canceled' ? 'released'
+                    : depositIntent.status === 'succeeded' ? 'captured'
+                        : 'failed'
+
+            await supabase
+                .from('bookings')
+                .update({
+                    deposit_intent_id: depositIntent.id,
+                    deposit_amount: depositIntent.amount / 100,
+                    deposit_status: depositStatus,
+                    deposit_updated_at: new Date().toISOString(),
+                })
+                .eq('id', booking.id)
+
+            console.log(`Deposit hold reconciled for booking ${booking.booking_number}: ${depositStatus}`)
+        }
+    } catch (depositError) {
+        console.error('Error reconciling deposit hold:', depositError)
+        // Don't throw - booking is more important
+    }
+
     // Send email notifications (non-blocking)
     try {
         const { sendBookingConfirmation, sendAdminBookingNotification } = await import('@/lib/email/send')

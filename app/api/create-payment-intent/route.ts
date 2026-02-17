@@ -43,10 +43,25 @@ export async function POST(request: NextRequest) {
             )
         }
 
+        // Create a Stripe Customer so the PaymentMethod can be reused for the security deposit hold
+        const customer = await stripe.customers.create({
+            email: guestEmail,
+            name: guestName,
+            phone: guestPhone || undefined,
+            metadata: {
+                source: 'obsidian_booking',
+                checkIn,
+                checkOut,
+            },
+        })
+
         // Create Stripe PaymentIntent with 3D Secure enforcement
+        // setup_future_usage: 'off_session' tells Stripe to save the PM for later reuse (deposit hold)
         const paymentIntent = await stripe.paymentIntents.create({
             amount: Math.round(totalAmount * 100), // Convert to cents
             currency: 'usd',
+            customer: customer.id, // Attach to customer for PM reuse
+            setup_future_usage: 'off_session', // Save PM for security deposit hold
             automatic_payment_methods: {
                 enabled: true,
             },

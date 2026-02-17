@@ -709,8 +709,24 @@ function BookingPageContent() {
                                         <StripePaymentForm
                                             clientSecret={clientSecret}
                                             totalAmount={pricing?.total || 0}
-                                            onSuccess={(paymentIntentId) => {
+                                            onSuccess={async (paymentIntentId, paymentMethodId) => {
                                                 const formData = watch();
+
+                                                // Create security deposit hold (non-blocking)
+                                                try {
+                                                    await fetch('/api/create-deposit-hold', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({
+                                                            paymentIntentId,
+                                                            paymentMethodId,
+                                                        }),
+                                                    });
+                                                } catch (depositError) {
+                                                    // Don't block the booking if deposit hold fails
+                                                    console.error('Deposit hold failed:', depositError);
+                                                }
+
                                                 const params = new URLSearchParams({
                                                     paymentIntentId,
                                                     checkIn: formData.checkIn,

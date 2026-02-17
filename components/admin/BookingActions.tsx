@@ -1,13 +1,207 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Send, X, Loader2, CheckCircle, AlertCircle, MessageSquare, Reply } from 'lucide-react';
+import { Send, X, Loader2, CheckCircle, AlertCircle, MessageSquare, Reply, Shield, ShieldCheck, ShieldX, DollarSign } from 'lucide-react';
 
 interface BookingActionsProps {
     bookingId: string;
     guestName: string;
     guestEmail: string;
     specialRequests?: string;
+}
+
+interface DepositManagerProps {
+    bookingId: string;
+    guestName: string;
+    depositStatus: string;
+    depositAmount: number;
+    depositCapturedAmount?: number;
+    depositUpdatedAt?: string;
+}
+
+export function DepositManager({
+    bookingId,
+    guestName,
+    depositStatus: initialStatus,
+    depositAmount,
+    depositCapturedAmount,
+    depositUpdatedAt,
+}: DepositManagerProps) {
+    const [status, setStatus] = useState(initialStatus);
+    const [loading, setLoading] = useState(false);
+    const [actionResult, setActionResult] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+    const [showCaptureInput, setShowCaptureInput] = useState(false);
+    const [captureAmount, setCaptureAmount] = useState(depositAmount.toString());
+    const [confirmAction, setConfirmAction] = useState<'release' | 'capture' | null>(null);
+    const [captured, setCaptured] = useState(depositCapturedAmount || 0);
+
+    const handleAction = async (action: 'release' | 'capture') => {
+        setLoading(true);
+        setActionResult(null);
+        setConfirmAction(null);
+
+        try {
+            const body: any = { action };
+            if (action === 'capture' && captureAmount) {
+                body.amount = parseFloat(captureAmount);
+            }
+
+            const res = await fetch(`/api/admin/bookings/${bookingId}/deposit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || `Failed to ${action} deposit`);
+            }
+
+            setStatus(data.depositStatus);
+            if (data.capturedAmount) setCaptured(data.capturedAmount);
+            setActionResult({ type: 'success', message: data.message });
+            setShowCaptureInput(false);
+        } catch (err: any) {
+            setActionResult({ type: 'error', message: err.message || 'Operation failed' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode; bg: string }> = {
+        none: { label: 'No Deposit', color: 'text-stone-500', icon: <Shield size={16} />, bg: 'bg-stone-50 border-stone-200' },
+        held: { label: 'Hold Active', color: 'text-amber-700', icon: <Shield size={16} className="text-amber-600" />, bg: 'bg-amber-50 border-amber-200' },
+        released: { label: 'Released', color: 'text-green-700', icon: <ShieldCheck size={16} className="text-green-600" />, bg: 'bg-green-50 border-green-200' },
+        captured: { label: 'Captured', color: 'text-red-700', icon: <ShieldX size={16} className="text-red-600" />, bg: 'bg-red-50 border-red-200' },
+        failed: { label: 'Hold Failed', color: 'text-stone-500', icon: <AlertCircle size={16} className="text-stone-400" />, bg: 'bg-stone-50 border-stone-200' },
+    };
+
+    const config = statusConfig[status] || statusConfig.none;
+
+    if (status === 'none') return null;
+
+    return (
+        <div className="p-6 rounded-2xl bg-white border border-stone-200">
+            <h3 className="text-sm font-semibold uppercase tracking-widest text-[#A18058] mb-4 flex items-center gap-2">
+                <DollarSign size={14} />
+                Security Deposit
+            </h3>
+
+            {/* Status Badge */}
+            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium ${config.bg} ${config.color} mb-4`}>
+                {config.icon}
+                {config.label}
+                {status === 'held' && <span className="text-amber-500">• ${depositAmount.toLocaleString()}</span>}
+                {status === 'captured' && <span className="text-red-500">• ${captured.toLocaleString()} charged</span>}
+            </div>
+
+            {depositUpdatedAt && (
+                <p className="text-xs text-stone-400 mb-4">
+                    Last updated: {new Date(depositUpdatedAt).toLocaleString()}
+                </p>
+            )}
+
+            {/* Action Result */}
+            {actionResult && (
+                <div className={`mb-4 p-3 rounded-xl border text-sm flex items-center gap-2 ${actionResult.type === 'success'
+                    ? 'bg-green-50 border-green-200 text-green-700'
+                    : 'bg-red-50 border-red-200 text-red-700'
+                    }`}>
+                    {actionResult.type === 'success' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
+                    {actionResult.message}
+                </div>
+            )}
+
+            {/* Actions (only show when deposit is held) */}
+            {status === 'held' && (
+                <div className="space-y-3">
+                    {/* Confirmation Dialog */}
+                    {confirmAction && (
+                        <div className="p-4 rounded-xl bg-stone-50 border border-stone-200">
+                            <p className="text-sm text-stone-700 mb-3">
+                                {confirmAction === 'release'
+                                    ? `Release the $${depositAmount.toLocaleString()} hold? ${guestName} will NOT be charged.`
+                                    : `Capture $${parseFloat(captureAmount).toLocaleString()} from ${guestName}'s deposit? This WILL charge their card.`}
+                            </p>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => handleAction(confirmAction)}
+                                    disabled={loading}
+                                    className={`px-4 py-2 rounded-full text-xs font-medium text-white flex items-center gap-1.5 ${confirmAction === 'release'
+                                        ? 'bg-green-600 hover:bg-green-700'
+                                        : 'bg-red-600 hover:bg-red-700'
+                                        } disabled:opacity-50`}
+                                >
+                                    {loading && <Loader2 size={13} className="animate-spin" />}
+                                    {confirmAction === 'release' ? 'Yes, Release' : 'Yes, Capture'}
+                                </button>
+                                <button
+                                    onClick={() => setConfirmAction(null)}
+                                    disabled={loading}
+                                    className="px-4 py-2 rounded-full text-xs font-medium border border-stone-200 hover:bg-stone-50 disabled:opacity-50"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {!confirmAction && (
+                        <div className="flex flex-wrap gap-2">
+                            {/* Release Button */}
+                            <button
+                                onClick={() => setConfirmAction('release')}
+                                className="px-4 py-2 rounded-full border border-green-200 text-green-700 text-xs font-medium hover:bg-green-50 transition-colors flex items-center gap-1.5"
+                            >
+                                <ShieldCheck size={13} />
+                                Release Hold
+                            </button>
+
+                            {/* Capture Button */}
+                            {showCaptureInput ? (
+                                <div className="flex items-center gap-2">
+                                    <div className="flex items-center border border-stone-200 rounded-full overflow-hidden">
+                                        <span className="pl-3 text-xs text-stone-500">$</span>
+                                        <input
+                                            type="number"
+                                            value={captureAmount}
+                                            onChange={(e) => setCaptureAmount(e.target.value)}
+                                            max={depositAmount}
+                                            min={1}
+                                            step="0.01"
+                                            className="w-24 px-2 py-2 text-xs border-none outline-none bg-transparent"
+                                        />
+                                    </div>
+                                    <button
+                                        onClick={() => setConfirmAction('capture')}
+                                        disabled={!captureAmount || parseFloat(captureAmount) <= 0}
+                                        className="px-4 py-2 rounded-full bg-red-600 text-white text-xs font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+                                    >
+                                        Capture
+                                    </button>
+                                    <button
+                                        onClick={() => setShowCaptureInput(false)}
+                                        className="p-2 rounded-full hover:bg-stone-100 text-stone-400"
+                                    >
+                                        <X size={14} />
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => setShowCaptureInput(true)}
+                                    className="px-4 py-2 rounded-full border border-red-200 text-red-700 text-xs font-medium hover:bg-red-50 transition-colors flex items-center gap-1.5"
+                                >
+                                    <ShieldX size={13} />
+                                    Capture for Damages
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
 }
 
 export function BookingActions({ bookingId, guestName, guestEmail, specialRequests }: BookingActionsProps) {

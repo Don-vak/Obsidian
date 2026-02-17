@@ -3,7 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, User, Calendar, CreditCard, ShieldCheck, ShieldAlert, Clock, MessageSquare, Phone, Mail } from 'lucide-react';
 import Link from 'next/link';
-import { BookingActions } from '@/components/admin/BookingActions';
+import { BookingActions, DepositManager } from '@/components/admin/BookingActions';
 
 export const dynamic = 'force-dynamic';
 
@@ -215,6 +215,18 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                             <p className="text-xs font-mono text-stone-500 break-all">{booking.stripe_payment_intent_id}</p>
                         </div>
                     </section>
+
+                    {/* Security Deposit */}
+                    {booking.deposit_status && booking.deposit_status !== 'none' && (
+                        <DepositManager
+                            bookingId={booking.id}
+                            guestName={booking.guest_name}
+                            depositStatus={booking.deposit_status}
+                            depositAmount={Number(booking.deposit_amount) || 0}
+                            depositCapturedAmount={Number(booking.deposit_captured_amount) || 0}
+                            depositUpdatedAt={booking.deposit_updated_at}
+                        />
+                    )}
                 </div>
             </div>
         </div>

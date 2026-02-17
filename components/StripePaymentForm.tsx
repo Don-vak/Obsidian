@@ -14,7 +14,7 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 
 interface PaymentFormProps {
     clientSecret: string;
-    onSuccess: (paymentIntentId: string) => void;
+    onSuccess: (paymentIntentId: string, paymentMethodId: string) => void;
     onError: (error: string) => void;
     totalAmount: number;
 }
@@ -60,7 +60,10 @@ function CheckoutForm({ onSuccess, onError, totalAmount }: Omit<PaymentFormProps
                 setIsProcessing(false);
             } else if (paymentIntent && paymentIntent.status === 'succeeded') {
                 setPaymentStatus('paid');
-                onSuccess(paymentIntent.id);
+                const pmId = typeof paymentIntent.payment_method === 'string'
+                    ? paymentIntent.payment_method
+                    : paymentIntent.payment_method?.id || '';
+                onSuccess(paymentIntent.id, pmId);
             }
         } catch (err) {
             setPaymentStatus('failed');
