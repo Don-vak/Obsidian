@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, User, Calendar, CreditCard, ShieldCheck, ShieldAlert, Clock, MessageSquare, Phone, Mail } from 'lucide-react';
 import Link from 'next/link';
+import { BookingActions } from '@/components/admin/BookingActions';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,15 +59,13 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
                         </div>
                     </div>
 
-                    {/* Actions (Phase 2 placeholder) */}
-                    <div className="flex gap-3">
-                        <button className="px-4 py-2 rounded-full border border-stone-200 text-xs uppercase tracking-wider font-medium hover:bg-stone-50 transition-colors">
-                            Edit Booking
-                        </button>
-                        <button className="px-4 py-2 rounded-full bg-[#1C1917] text-white text-xs uppercase tracking-wider font-medium hover:bg-[#2C2926] transition-colors">
-                            Send Message
-                        </button>
-                    </div>
+                    {/* Client-side action buttons + message modal */}
+                    <BookingActions
+                        bookingId={booking.id}
+                        guestName={booking.guest_name}
+                        guestEmail={booking.guest_email}
+                        specialRequests={booking.special_requests}
+                    />
                 </div>
             </div>
 
