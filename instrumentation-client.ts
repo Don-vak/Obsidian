@@ -1,0 +1,26 @@
+import * as Sentry from "@sentry/nextjs";
+
+Sentry.init({
+    dsn: "https://fb4c8a3f98684241b9e8f7819046b214@o4510901751971840.ingest.us.sentry.io/4510901760950272",
+
+    // Performance monitoring - sample 20% of transactions in production
+    tracesSampleRate: process.env.NODE_ENV === "production" ? 0.2 : 1.0,
+
+    // Session replay - captures user sessions for debugging
+    replaysSessionSampleRate: 0.1, // 10% of sessions
+    replaysOnErrorSampleRate: 1.0, // 100% of sessions with errors
+
+    integrations: [
+        Sentry.replayIntegration(),
+        Sentry.browserTracingIntegration(),
+    ],
+
+    // Enable structured logging
+    enableLogs: true,
+
+    // Environment tag
+    environment: process.env.NODE_ENV || "development",
+});
+
+// Required by Sentry for Next.js 16+ client-side navigation tracing
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

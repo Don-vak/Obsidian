@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import Stripe from 'stripe'
+import * as Sentry from '@sentry/nextjs'
 
 export async function POST(request: NextRequest) {
     const body = await request.text()
@@ -24,6 +25,7 @@ export async function POST(request: NextRequest) {
         )
     } catch (err) {
         console.error('Webhook signature verification failed:', err)
+        Sentry.captureException(err, { tags: { context: 'stripe_webhook_signature' } })
         return NextResponse.json(
             { error: 'Webhook signature verification failed' },
             { status: 400 }
@@ -60,6 +62,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ received: true })
     } catch (error) {
         console.error('Error processing webhook:', error)
+        Sentry.captureException(error, {
+            tags: { context: 'stripe_webhook_processing', event_type: event.type },
+        })
         return NextResponse.json(
             { error: 'Webhook processing failed' },
             { status: 500 }

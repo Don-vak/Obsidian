@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import * as Sentry from '@sentry/nextjs'
 
 export async function POST(request: NextRequest) {
     try {
@@ -91,6 +92,7 @@ export async function POST(request: NextRequest) {
         })
     } catch (error) {
         console.error('Error creating payment intent:', error)
+        Sentry.captureException(error, { tags: { context: 'create_payment_intent' } })
         return NextResponse.json(
             { error: 'Failed to create payment intent' },
             { status: 500 }

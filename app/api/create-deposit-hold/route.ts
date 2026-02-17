@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
+import * as Sentry from '@sentry/nextjs'
 
 const DEPOSIT_AMOUNT = 1000 // $1,000 security deposit
 const MAX_RETRIES = 10
@@ -115,6 +116,7 @@ export async function POST(request: NextRequest) {
 
     } catch (error: any) {
         console.error('Error creating deposit hold:', error)
+        Sentry.captureException(error, { tags: { context: 'create_deposit_hold' } })
 
         if (error?.type === 'StripeCardError') {
             return NextResponse.json({
