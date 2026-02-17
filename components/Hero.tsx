@@ -37,7 +37,16 @@ export const Hero: React.FC = () => {
   const [hoveredDate, setHoveredDate] = useState<Date | null>(null);
   const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
   const [isLoadingDates, setIsLoadingDates] = useState(false);
+  const [nightlyRate, setNightlyRate] = useState<number | null>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
+
+  // Fetch nightly rate
+  useEffect(() => {
+    fetch('/api/pricing/nightly-rate')
+      .then(res => res.json())
+      .then(data => setNightlyRate(data.nightlyRate))
+      .catch(() => setNightlyRate(450));
+  }, []);
 
   // Fetch blocked dates
   useEffect(() => {
@@ -322,7 +331,7 @@ export const Hero: React.FC = () => {
             <div className="glass-panel p-6 rounded-[2rem] shadow-2xl border shadow-stone-900/20 border-white/60 backdrop-blur-3xl bg-white/10">
               <div className="flex justify-between items-center mb-6 border-b pb-4 border-stone-200/60">
                 <div>
-                  <span className="block text-xl font-medium serif text-stone-900">$850 <span className="text-sm font-normal text-stone-600 font-sans">/ night</span></span>
+                  <span className="block text-xl font-medium serif text-stone-900">{nightlyRate !== null ? `$${nightlyRate.toLocaleString()}` : '...'} <span className="text-sm font-normal text-stone-600 font-sans">/ night</span></span>
                   <div className="flex items-center gap-1 mt-1">
                     <Star size={10} className="text-[#A18058] fill-[#A18058]" />
                     <span className="text-[10px] font-medium text-stone-700">4.98 (124 reviews)</span>
@@ -340,8 +349,8 @@ export const Hero: React.FC = () => {
                     type="button"
                     onClick={() => setCalendarOpen(!calendarOpen)}
                     className={`group relative px-4 py-3 rounded-2xl border transition-all text-left ${calendarOpen && !checkIn
-                        ? 'border-[#A18058] bg-white shadow-sm'
-                        : 'bg-white/90 border-stone-200 hover:border-[#A18058]/50'
+                      ? 'border-[#A18058] bg-white shadow-sm'
+                      : 'bg-white/90 border-stone-200 hover:border-[#A18058]/50'
                       }`}
                   >
                     <span className="block text-[9px] font-semibold text-[#A18058] uppercase tracking-widest mb-1">Check In</span>
@@ -356,8 +365,8 @@ export const Hero: React.FC = () => {
                     type="button"
                     onClick={() => setCalendarOpen(!calendarOpen)}
                     className={`group relative px-4 py-3 rounded-2xl border transition-all text-left ${calendarOpen && checkIn && !checkOut
-                        ? 'border-[#A18058] bg-white shadow-sm'
-                        : 'bg-white/90 border-stone-200 hover:border-[#A18058]/50'
+                      ? 'border-[#A18058] bg-white shadow-sm'
+                      : 'bg-white/90 border-stone-200 hover:border-[#A18058]/50'
                       }`}
                   >
                     <span className="block text-[9px] font-semibold text-[#A18058] uppercase tracking-widest mb-1">Check Out</span>

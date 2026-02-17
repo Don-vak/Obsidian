@@ -26,7 +26,7 @@ export const PricingSummary: React.FC<PricingSummaryProps> = ({ pricing, checkIn
             {/* Pricing Header */}
             <div className="mb-6 pb-6 border-b border-stone-200/60">
                 <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-medium serif text-stone-900">$850</span>
+                    <span className="text-2xl font-medium serif text-stone-900">{pricing ? `$${pricing.nightlyRate.toLocaleString()}` : '...'}</span>
                     <span className="text-sm text-stone-600">/ night</span>
                 </div>
                 <div className="flex items-center gap-1 mt-1">
