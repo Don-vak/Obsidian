@@ -1,17 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe/server';
 
+import { CreateVerificationSessionSchema } from '@/lib/schemas/api';
+
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { guestName, guestEmail, bookingMetadata } = body;
+        const result = CreateVerificationSessionSchema.safeParse(body);
+
+        if (!result.success) {
+            return NextResponse.json(
+                { error: 'Invalid request data', details: result.error.flatten() },
+                { status: 400 }
+            );
+        }
+
+        const { guestName, guestEmail, bookingMetadata } = result.data;
 
         // Create a Stripe Identity VerificationSession
         const verificationSession = await stripe.identity.verificationSessions.create({
             type: 'document',
             metadata: {
-                guestName: guestName || '',
-                guestEmail: guestEmail || '',
+                guestName,
+                guestEmail,
                 ...bookingMetadata,
             },
             options: {

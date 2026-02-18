@@ -2,15 +2,37 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { resilientQuery, CACHE_TTL } from '@/lib/supabase/resilient'
 
+import { CreateBookingSchema } from '@/lib/schemas/api'
+
 // POST /api/bookings - Create a new booking
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json()
+        const result = CreateBookingSchema.safeParse(body)
         const supabase = await createServerSupabaseClient()
 
+        if (!result.success) {
+            return NextResponse.json(
+                { error: 'Invalid request data', details: result.error.flatten() },
+                { status: 400 }
+            )
+        }
+
+        const {
+            checkIn,
+            checkOut,
+            guestCount,
+            guestName,
+            guestEmail,
+            guestPhone,
+            specialRequests,
+            agreeToHouseRules,
+            agreeToCancellationPolicy
+        } = result.data
+
         // Calculate nights
-        const checkInDate = new Date(body.checkIn)
-        const checkOutDate = new Date(body.checkOut)
+        const checkInDate = new Date(checkIn)
+        const checkOutDate = new Date(checkOut)
         const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24))
 
         if (nights < 1) {
@@ -19,12 +41,12 @@ export async function POST(request: NextRequest) {
 
         // Check availability - blocked_dates table
         const { data: blockedDates } = await resilientQuery(
-            `availability:${body.checkIn}:${body.checkOut}`,
+            `availability:${checkIn}:${checkOut}`,
             () => supabase
                 .from('blocked_dates')
                 .select('id')
-                .lt('start_date', body.checkOut)
-                .gt('end_date', body.checkIn),
+                .lt('start_date', checkOut)
+                .gt('end_date', checkIn),
             'check-booking-availability',
             { cacheTTL: CACHE_TTL.SHORT }
         )
@@ -35,13 +57,13 @@ export async function POST(request: NextRequest) {
 
         // Also check confirmed bookings directly for consistency
         const { data: existingBookings } = await resilientQuery(
-            `booking-conflicts:${body.checkIn}:${body.checkOut}`,
+            `booking-conflicts:${checkIn}:${checkOut}`,
             () => supabase
                 .from('bookings')
                 .select('id')
                 .eq('status', 'confirmed')
-                .lt('check_in', body.checkOut)
-                .gt('check_out', body.checkIn),
+                .lt('check_in', checkOut)
+                .gt('check_out', checkIn),
             'check-booking-conflicts',
             { cacheTTL: CACHE_TTL.SHORT }
         )
@@ -93,14 +115,14 @@ export async function POST(request: NextRequest) {
             () => supabase
                 .from('bookings')
                 .insert({
-                    check_in: body.checkIn,
-                    check_out: body.checkOut,
+                    check_in: checkIn,
+                    check_out: checkOut,
                     nights,
-                    guest_count: body.guestCount,
-                    guest_name: body.guestName,
-                    guest_email: body.guestEmail,
-                    guest_phone: body.guestPhone,
-                    special_requests: body.specialRequests || null,
+                    guest_count: guestCount,
+                    guest_name: guestName,
+                    guest_email: guestEmail,
+                    guest_phone: guestPhone,
+                    special_requests: specialRequests || null,
                     nightly_rate: Number(cfg.base_nightly_rate),
                     subtotal: Number(subtotal.toFixed(2)),
                     discount: Number(discount.toFixed(2)),
@@ -108,8 +130,8 @@ export async function POST(request: NextRequest) {
                     service_fee: Number(serviceFee.toFixed(2)),
                     tax_amount: Number(taxAmount.toFixed(2)),
                     total: Number(total.toFixed(2)),
-                    agreed_to_house_rules: body.agreeToHouseRules,
-                    agreed_to_cancellation_policy: body.agreeToCancellationPolicy,
+                    agreed_to_house_rules: agreeToHouseRules,
+                    agreed_to_cancellation_policy: agreeToCancellationPolicy,
                     status: 'pending',
                     payment_status: 'pending'
                 })
@@ -134,8 +156,8 @@ export async function POST(request: NextRequest) {
             () => supabase
                 .from('blocked_dates')
                 .insert({
-                    start_date: body.checkIn,
-                    end_date: body.checkOut,
+                    start_date: checkIn,
+                    end_date: checkOut,
                     reason: 'booked',
                     booking_id: bookingData.id
                 }),

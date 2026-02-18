@@ -2,15 +2,22 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { resilientQuery } from '@/lib/supabase/resilient'
 
+import { ContactSubmissionSchema } from '@/lib/schemas/api'
+
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json()
+        const result = ContactSubmissionSchema.safeParse(body)
         const supabase = await createServerSupabaseClient()
 
-        // Validate required fields
-        if (!body.name || !body.email || !body.subject || !body.message) {
-            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+        if (!result.success) {
+            return NextResponse.json(
+                { error: 'Invalid request data', details: result.error.flatten() },
+                { status: 400 }
+            )
         }
+
+        const { name, email, phone, subject, message } = result.data
 
         // Create contact submission with resilience (no caching for writes)
         const { data, error } = await resilientQuery(
@@ -18,11 +25,11 @@ export async function POST(request: NextRequest) {
             () => supabase
                 .from('contact_submissions')
                 .insert({
-                    name: body.name,
-                    email: body.email,
-                    phone: body.phone || null,
-                    subject: body.subject,
-                    message: body.message,
+                    name,
+                    email,
+                    phone: phone || null,
+                    subject,
+                    message,
                     status: 'new'
                 })
                 .select()
