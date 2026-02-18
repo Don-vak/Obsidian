@@ -12,8 +12,8 @@ export default function HouseRulesPage() {
 
     const rules = [
         { icon: Clock, title: "Check-in & Check-out", desc: "Check-in is from 4:00 PM. Check-out is by 11:00 AM. Early check-in or late check-out may be available upon request." },
-        { icon: Volume2, title: "Quiet Hours", desc: "To respect our neighbors and the serenity of the canyon, quiet hours are strictly enforced between 10:00 PM and 8:00 AM." },
-        { icon: Cigarette, title: "No Smoking", desc: "The Obsidian is a non-smoking property. This includes outdoor decks and pool areas due to high fire risk in the hills." },
+        { icon: Volume2, title: "Quiet Hours", desc: "To respect our neighbors, quiet hours are strictly enforced between 10:00 PM and 8:00 AM." },
+        { icon: Cigarette, title: "No Smoking", desc: "This is a non-smoking property. This includes outdoor decks and pool areas due to building regulations." },
         { icon: Shield, title: "Occupancy", desc: "Maximum occupancy is 4 guests. No unregistered guests or parties are permitted without prior written approval." },
     ];
 
@@ -30,7 +30,7 @@ export default function HouseRulesPage() {
                 >
                     <h1 className="text-4xl md:text-6xl serif text-stone-900 mb-6">House Rules</h1>
                     <p className="text-lg text-stone-500 font-light mb-16 max-w-2xl leading-relaxed">
-                        We have crafted these guidelines to ensure every guest enjoys a flawless experience while maintaining the integrity of our home and the surrounding nature.
+                        We have crafted these guidelines to ensure every guest enjoys a flawless experience.
                     </p>
                 </motion.div>
 
@@ -55,9 +55,9 @@ export default function HouseRulesPage() {
 
                 <div className="mt-16 p-8 bg-[#1C1917] rounded-3xl text-stone-400 font-light text-sm leading-relaxed flex flex-col md:flex-row gap-8 items-center justify-between">
                     <p className="max-w-xl">
-                        By confirming a reservation at The Obsidian, you agree to abide by these rules. Failure to comply may result in immediate cancellation of your stay without refund.
+                        By confirming a reservation at Chic Music Row Condo, you agree to abide by these rules. Failure to comply may result in immediate cancellation of your stay without refund.
                     </p>
-                    <span className="text-[#A18058] font-serif italic text-lg whitespace-nowrap">The Obsidian Mgmt.</span>
+                    <span className="text-[#A18058] font-serif italic text-lg whitespace-nowrap">Amy Bream</span>
                 </div>
             </div>
         </div>

@@ -5,6 +5,7 @@ import { Gallery } from '@/components/Gallery';
 import { Host } from '@/components/Host';
 import { Location } from '@/components/Location';
 import { HouseRules } from '@/components/HouseRules';
+import { FAQ } from '@/components/FAQ';
 import { Testimonials } from '@/components/Testimonials';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
@@ -92,6 +93,7 @@ export default async function Home() {
             <Host />
             <Location />
             <HouseRules />
+            <FAQ />
             <Testimonials />
         </>
     );

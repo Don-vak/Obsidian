@@ -42,11 +42,11 @@ export default function BookingSuccessPage() {
 
                     <h1 className="text-4xl md:text-5xl serif text-stone-900 mb-6">Request Received</h1>
                     <p className="text-stone-500 font-light text-lg mb-10 leading-relaxed">
-                        Thank you for choosing The Obsidian. Your reservation request has been securely transmitted to our concierge team.
+                        Thank you for choosing Chic Music Row Condo. Your reservation request has been securely transmitted to our concierge team.
                     </p>
 
                     <Link href="/" className="inline-flex items-center gap-2 bg-[#1C1917] hover:bg-[#292524] text-[#FAFAF9] px-8 py-4 rounded-full text-xs font-semibold uppercase tracking-widest transition-all shadow-lg hover:-translate-y-1">
-                        Return to Residence
+                        Return to Site
                         <ArrowRight size={14} />
                     </Link>
                 </motion.div>
@@ -60,7 +60,7 @@ export default function BookingSuccessPage() {
             <nav className="bg-white border-b border-stone-200">
                 <div className="max-w-7xl mx-auto px-6 py-4">
                     <Link href="/" className="text-xl serif font-light text-stone-900">
-                        The Obsidian
+                        Chic Music Row Condo
                     </Link>
                 </div>
             </nav>

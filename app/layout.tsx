@@ -20,8 +20,8 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-    title: "The Obsidian | Private Residence",
-    description: "Sanctuary in the hills. A masterfully designed architectural gem.",
+    title: "Chic Music Row Condo | Nashville",
+    description: "Luxury Music Row condo with rooftop pool, gym, free parking. Steps from Vanderbilt and Broadway.",
     openGraph: {
         title: "The Obsidian | Private Residence",
         description: "Sanctuary in the hills. A masterfully designed architectural gem.",

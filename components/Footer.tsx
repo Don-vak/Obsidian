@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { Mail, Phone, Calendar, Instagram, Twitter, Facebook } from 'lucide-react';
 
 export const Footer: React.FC = () => {
@@ -23,9 +24,9 @@ export const Footer: React.FC = () => {
               {/* Column 1: Contact */}
               <div className="flex flex-col justify-start">
                 <p className="text-[10px] uppercase tracking-[0.2em] text-[#A18058] mb-4 font-sans font-medium">Concierge</p>
-                <a href="mailto:stay@theobsidian.com" className="text-xl sm:text-2xl font-light hover:text-[#A18058] transition-colors font-sans flex items-center gap-3 group">
+                <a href="mailto:amy@chicmusicrow.com" className="text-xl sm:text-2xl font-light hover:text-[#A18058] transition-colors font-sans flex items-center gap-3 group">
                   <Mail size={24} className="text-stone-500 group-hover:text-[#A18058] transition-colors" />
-                  <span className="border-b border-transparent group-hover:border-[#A18058] transition-colors pb-0.5">stay@theobsidian.com</span>
+                  <span className="border-b border-transparent group-hover:border-[#A18058] transition-colors pb-0.5">amy@chicmusicrow.com</span>
                 </a>
                 <a href="tel:+15550192834" className="text-lg sm:text-xl font-light text-stone-400 hover:text-[#A18058] transition-colors font-sans flex items-center gap-3 group mt-3">
                   <Phone size={22} className="text-stone-600 group-hover:text-[#A18058] transition-colors" />
@@ -62,14 +63,14 @@ export const Footer: React.FC = () => {
                   <a key={item} href={`#${item.toLowerCase()}`} className="hover:text-[#FAFAF9] transition-colors uppercase tracking-wider">{item}</a>
                 ))}
               </div>
-              
+
               <div className="flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-8">
                 <div className="flex gap-6">
-                  <a href="#" className="hover:text-stone-300 transition-colors">Privacy</a>
-                  <a href="#" className="hover:text-stone-300 transition-colors">Terms</a>
-                  <a href="#" className="hover:text-stone-300 transition-colors">House Rules</a>
+                  <Link href="/policies" className="hover:text-stone-300 transition-colors">Privacy</Link>
+                  <Link href="/policies" className="hover:text-stone-300 transition-colors">Terms</Link>
+                  <Link href="/house-rules" className="hover:text-stone-300 transition-colors">House Rules</Link>
                 </div>
-                <p className="opacity-60">© 2024 The Obsidian.</p>
+                <p className="opacity-60">© 2024 Chic Music Row Condo.</p>
               </div>
             </div>
           </div>

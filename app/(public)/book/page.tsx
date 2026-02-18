@@ -569,7 +569,7 @@ function BookingPageContent() {
                                                     </h4>
                                                 </div>
                                                 <div className="max-h-48 overflow-y-auto p-4 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-600 leading-relaxed mb-4 scrollbar-thin">
-                                                    <p className="font-semibold text-stone-800 mb-2">SHORT-TERM RENTAL AGREEMENT — THE OBSIDIAN</p>
+                                                    <p className="font-semibold text-stone-800 mb-2">SHORT-TERM RENTAL AGREEMENT — CHIC MUSIC ROW CONDO</p>
                                                     <p className="mb-2">This Agreement is entered into between the property owner/manager ("Host") and the guest ("Guest") identified during the booking process.</p>
                                                     <p className="font-semibold text-stone-700 mb-1">1. PROPERTY USE</p>
                                                     <p className="mb-2">The property is provided for short-term residential use only. No commercial activities, filming, or events are permitted without prior written consent.</p>

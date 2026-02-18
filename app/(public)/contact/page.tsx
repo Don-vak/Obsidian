@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Instagram, Facebook } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
 import { ContactForm } from '@/components/ContactForm';
 import { ContactInfoCard } from '@/components/ContactInfoCard';
 
@@ -18,7 +18,7 @@ export default function ContactPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="text-[#A18058] font-semibold tracking-[0.2em] text-[10px] uppercase mb-3 block"
                     >
-                        Contact
+                        Get in Touch
                     </motion.span>
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
@@ -34,7 +34,7 @@ export default function ContactPage() {
                         transition={{ delay: 0.2 }}
                         className="text-lg text-stone-600 font-light max-w-2xl mx-auto"
                     >
-                        Whether you're planning your stay or have questions about The Obsidian, our concierge team is ready to assist you.
+                        Have questions about the condo, the area, or your upcoming stay? Amy is happy to assist.
                     </motion.p>
                 </div>
 
@@ -61,19 +61,13 @@ export default function ContactPage() {
                         <ContactInfoCard icon={Mail} title="Direct Contact">
                             <div className="space-y-2">
                                 <a
-                                    href="mailto:contact@theobsidian.com"
+                                    href="mailto:amy@chicmusicrow.com"
                                     className="block text-sm text-stone-700 hover:text-[#A18058] transition-colors"
                                 >
-                                    contact@theobsidian.com
-                                </a>
-                                <a
-                                    href="tel:+15551234567"
-                                    className="block text-sm text-stone-700 hover:text-[#A18058] transition-colors"
-                                >
-                                    +1 (555) 123-4567
+                                    amy@chicmusicrow.com
                                 </a>
                                 <p className="text-xs text-stone-500 pt-2">
-                                    Available 9AM - 9PM daily
+                                    Typical response time: Within 1 hour
                                 </p>
                             </div>
                         </ContactInfoCard>
@@ -81,39 +75,10 @@ export default function ContactPage() {
                         {/* Location */}
                         <ContactInfoCard icon={MapPin} title="Location">
                             <div className="space-y-1">
-                                <p className="text-sm text-stone-700">Hillside Retreat</p>
-                                <p className="text-sm text-stone-700">Malibu, California</p>
+                                <p className="text-sm text-stone-700">Music Row</p>
+                                <p className="text-sm text-stone-700">Nashville, TN 37212</p>
                                 <p className="text-xs text-stone-500 pt-2">
-                                    Exact address shared upon booking
-                                </p>
-                            </div>
-                        </ContactInfoCard>
-
-                        {/* Social Media */}
-                        <ContactInfoCard icon={Instagram} title="Follow Us">
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-4">
-                                    <a
-                                        href="https://instagram.com/theobsidian"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-2 text-sm text-stone-700 hover:text-[#A18058] transition-colors"
-                                    >
-                                        <Instagram size={18} />
-                                        <span>Instagram</span>
-                                    </a>
-                                    <a
-                                        href="https://facebook.com/theobsidian"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-2 text-sm text-stone-700 hover:text-[#A18058] transition-colors"
-                                    >
-                                        <Facebook size={18} />
-                                        <span>Facebook</span>
-                                    </a>
-                                </div>
-                                <p className="text-xs text-stone-500">
-                                    @theobsidian
+                                    Exact address provided after booking
                                 </p>
                             </div>
                         </ContactInfoCard>

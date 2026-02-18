@@ -18,7 +18,7 @@ export default function PoliciesPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="text-[#A18058] font-semibold tracking-[0.2em] text-[10px] uppercase mb-3 block"
                     >
-                        Policies & Guidelines
+                        House Rules
                     </motion.span>
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
@@ -26,7 +26,7 @@ export default function PoliciesPage() {
                         transition={{ delay: 0.1 }}
                         className="text-4xl md:text-5xl serif font-light text-stone-900 mb-3"
                     >
-                        House Rules & Policies
+                        Policies & Guidelines
                     </motion.h1>
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
@@ -34,7 +34,7 @@ export default function PoliciesPage() {
                         transition={{ delay: 0.2 }}
                         className="text-lg text-stone-600 font-light max-w-2xl mx-auto"
                     >
-                        Please review our policies to ensure a seamless stay
+                        Please review our policies to ensure a seamless stay in Music City.
                     </motion.p>
                 </div>
 
@@ -46,24 +46,18 @@ export default function PoliciesPage() {
                             A <strong>50% deposit</strong> is required to secure your reservation. The remaining 50% is due 14 days before check-in.
                         </p>
                         <p>
-                            <strong>Accepted payment methods:</strong> Credit card (Visa, Mastercard, American Express) and bank transfer.
-                        </p>
-                        <p>
-                            Booking confirmation will be sent within 24 hours of receiving your deposit. You will receive detailed arrival instructions 24 hours before check-in.
+                            <strong>Accepted payment methods:</strong> Credit card (Visa, Mastercard, American Express).
                         </p>
                     </PolicySection>
 
                     {/* Cancellation */}
                     <PolicySection icon={XCircle} title="Cancellation Policy" delay={0.35}>
-                        <p>We understand that plans can change. Our cancellation policy is as follows:</p>
+                        <p>We understand that plans can change. Our cancellation policy is:</p>
                         <ul className="list-disc list-inside space-y-2 ml-2">
                             <li><strong>30+ days before check-in:</strong> Full refund</li>
                             <li><strong>14-30 days before check-in:</strong> 50% refund</li>
                             <li><strong>Under 14 days:</strong> Non-refundable</li>
                         </ul>
-                        <p>
-                            We strongly recommend purchasing travel insurance for added peace of mind. In cases of force majeure or exceptional circumstances, we will work with you to find a fair solution.
-                        </p>
                     </PolicySection>
 
                     {/* Check-In & Check-Out */}
@@ -73,78 +67,46 @@ export default function PoliciesPage() {
                             <strong>Check-out:</strong> 11:00 AM
                         </p>
                         <p>
-                            We offer a seamless, contactless check-in experience with smart lock access codes sent 24 hours before arrival. Our concierge team is available to greet you personally if preferred.
-                        </p>
-                        <p>
-                            Early check-in and late check-out may be available upon request, subject to availability. Additional fees may apply.
+                            We offer a seamless, contactless check-in experience. You will receive a unique access code for the building and condo unit 24 hours before arrival.
                         </p>
                     </PolicySection>
 
                     {/* House Rules */}
                     <PolicySection icon={Home} title="House Rules" delay={0.45}>
                         <ul className="list-disc list-inside space-y-2 ml-2">
+                            <li><strong>Minimum Age:</strong> Primary renter must be 21+</li>
                             <li><strong>Maximum occupancy:</strong> 8 guests</li>
-                            <li><strong>Quiet hours:</strong> 10:00 PM - 8:00 AM</li>
-                            <li><strong>No smoking:</strong> Anywhere on the property (including outdoor areas)</li>
-                            <li><strong>No parties or events:</strong> Without prior written approval</li>
-                            <li><strong>Respect for neighbors:</strong> Required at all times</li>
-                            <li><strong>Proper use of amenities:</strong> Please follow all posted guidelines</li>
+                            <li><strong>Quiet hours:</strong> 10:00 PM - 8:00 AM (Strictly enforced by building management)</li>
+                            <li><strong>No smoking:</strong> Anywhere in the condo or on the balcony ($250 fine)</li>
+                            <li><strong>No parties or events:</strong> Immediate eviction without refund</li>
                         </ul>
-                        <p className="mt-3">
-                            We maintain our commitment to exclusivity by hosting only one party at a time, ensuring your complete privacy.
-                        </p>
                     </PolicySection>
 
                     {/* Pet Policy */}
                     <PolicySection icon={Dog} title="Pet Policy" delay={0.5}>
                         <p>
-                            We understand pets are family. <strong>Well-behaved dogs are welcome</strong> with prior approval and a <strong>$200 pet fee</strong>.
-                        </p>
-                        <p>
-                            Please inform us during booking and provide details about your furry companion, including breed, size, and temperament. Approval is granted on a case-by-case basis.
+                            We love pets! <strong>Dogs are welcome</strong> with prior approval and a pet fee.
                         </p>
                         <ul className="list-disc list-inside space-y-2 ml-2 mt-3">
-                            <li>Pets must be supervised at all times</li>
-                            <li>Not permitted on furniture or beds</li>
-                            <li>Guests are responsible for any pet-related damage</li>
-                            <li>Please clean up after your pet on the property</li>
+                            <li>Please inform us about your pet when booking</li>
+                            <li>Pets must not be left unattended on the balcony</li>
+                            <li>Please clean up after your pet</li>
                         </ul>
                     </PolicySection>
 
                     {/* Damage & Security */}
                     <PolicySection icon={Shield} title="Damage & Security" delay={0.55}>
                         <p>
-                            A refundable <strong>security deposit of $1,000</strong> is required and will be returned within 7 days after checkout, provided there is no damage beyond normal wear and tear.
-                        </p>
-                        <p>
-                            Please report any damage or issues immediately to our concierge team. Guests are responsible for any damages caused during their stay.
-                        </p>
-                        <p>
-                            The property is fully insured, and we maintain comprehensive security measures for your peace of mind.
+                            A refundable <strong>security deposit hold of $500</strong> is placed on your card 1 day before arrival and released 3 days after checkout, provided there is no damage.
                         </p>
                     </PolicySection>
 
                     {/* Amenities Usage */}
                     <PolicySection icon={Sparkles} title="Amenities Usage" delay={0.6}>
-                        <p><strong>Pool and Spa:</strong> Follow all safety guidelines. No glass containers near the pool. Children must be supervised at all times.</p>
-                        <p><strong>Kitchen:</strong> Fully equipped gourmet kitchen. Please clean after use and dispose of waste properly.</p>
-                        <p><strong>Smart Home Technology:</strong> Instructions provided in the welcome guide. Tech support available 24/7.</p>
-                        <p><strong>Outdoor Areas:</strong> Please respect property boundaries and maintain the natural beauty of the surroundings.</p>
-                        <p><strong>Parking:</strong> Secure parking for up to 4 vehicles in the designated area.</p>
-                    </PolicySection>
-
-                    {/* Guest Responsibilities */}
-                    <PolicySection icon={ClipboardCheck} title="Guest Responsibilities" delay={0.65}>
-                        <ul className="list-disc list-inside space-y-2 ml-2">
-                            <li><strong>Property care:</strong> Treat the property with respect as you would your own home</li>
-                            <li><strong>Waste disposal:</strong> Use designated bins. Recycling is encouraged</li>
-                            <li><strong>Energy conservation:</strong> Turn off lights and AC when not in use</li>
-                            <li><strong>Lost keys/codes:</strong> $100 replacement fee</li>
-                            <li><strong>Checkout:</strong> Leave property in good condition, remove all trash, and lock all doors</li>
-                        </ul>
-                        <p className="mt-3">
-                            Our housekeeping team will prepare the property for the next guests. Please do not strip beds or start laundry.
-                        </p>
+                        <p><strong>Pool:</strong> Seasonal (Memorial Day to Labor Day). Open 9 AM - 10 PM.</p>
+                        <p><strong>Gym:</strong> Open 24/7. Located on the 2nd floor.</p>
+                        <p><strong>Parking:</strong> One free spot in the attached garage. Key fob provided at check-in.</p>
+                        <p><strong>Rooftop Lounge:</strong> Open until 11 PM. Please respect other residents.</p>
                     </PolicySection>
                 </div>
 
@@ -161,16 +123,16 @@ export default function PoliciesPage() {
                         </div>
                     </div>
                     <h2 className="text-2xl serif font-light text-stone-900 mb-2">
-                        Questions about our policies?
+                        Questions?
                     </h2>
                     <p className="text-sm text-stone-600 mb-6">
-                        Our concierge team is here to help clarify any details
+                        Amy is here to help clarify any details
                     </p>
                     <Link
                         href="/contact"
                         className="inline-flex items-center gap-2 bg-[#1C1917] hover:bg-[#292524] text-[#FAFAF9] px-8 py-3 rounded-full text-xs font-semibold uppercase tracking-widest transition-all shadow-lg"
                     >
-                        Contact Us
+                        Contact Host
                     </Link>
                 </motion.div>
             </div>

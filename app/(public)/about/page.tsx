@@ -3,16 +3,24 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Sparkles, Eye, Palette, Home, Building2, Mountain, Shield } from 'lucide-react';
+import { Sparkles, Music, MapPin, Home } from 'lucide-react';
 import { FeatureCard } from '@/components/FeatureCard';
 
 export default function AboutPage() {
     return (
         <div className="min-h-screen bg-[#FAFAF9] pt-20">
             {/* Hero Section */}
-            <div className="relative h-[60vh] min-h-[500px] bg-gradient-to-br from-stone-800 to-stone-900 overflow-hidden">
+            <div className="relative h-[60vh] min-h-[500px] bg-stone-900 overflow-hidden">
+                <div className="absolute inset-0 z-0">
+                    <img
+                        src="/images/chic-condo/imgi_126_e25a74e5.jpg"
+                        alt="Music Row Skyline"
+                        className="w-full h-full object-cover opacity-60"
+                    />
+                </div>
+
                 {/* Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-b from-stone-900/50 to-stone-900/70 z-10" />
+                <div className="absolute inset-0 bg-gradient-to-b from-stone-900/50 to-stone-900/80 z-10" />
 
                 {/* Content */}
                 <div className="relative z-20 h-full flex flex-col items-center justify-center text-center px-6">
@@ -20,9 +28,9 @@ export default function AboutPage() {
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="text-6xl md:text-7xl serif font-light text-white mb-4"
+                        className="text-5xl md:text-7xl serif font-light text-white mb-4"
                     >
-                        The Obsidian
+                        Chic Music Row Condo
                     </motion.h1>
                     <motion.div
                         initial={{ opacity: 0, scaleX: 0 }}
@@ -36,7 +44,7 @@ export default function AboutPage() {
                         transition={{ delay: 0.6 }}
                         className="text-xl md:text-2xl text-stone-200 font-light"
                     >
-                        A Sanctuary of Modern Luxury
+                        Luxury Living in the Heart of Nashville
                     </motion.p>
                 </div>
             </div>
@@ -49,7 +57,7 @@ export default function AboutPage() {
                     transition={{ delay: 0.1 }}
                     className="text-[#A18058] font-semibold tracking-[0.2em] text-[10px] uppercase mb-3 block"
                 >
-                    Our Story
+                    The Location
                 </motion.span>
 
                 <div className="grid md:grid-cols-5 gap-8 items-start">
@@ -60,7 +68,7 @@ export default function AboutPage() {
                         className="md:col-span-2"
                     >
                         <h2 className="text-4xl md:text-5xl serif font-light text-stone-900 mb-6">
-                            Where Architecture Meets Nature
+                            Where Music History Meets Modern Luxury
                         </h2>
                     </motion.div>
 
@@ -71,13 +79,13 @@ export default function AboutPage() {
                         className="md:col-span-3 bg-white/90 backdrop-blur-md border border-stone-200 rounded-2xl p-8 shadow-sm"
                     >
                         <p className="text-base text-stone-700 leading-relaxed mb-4">
-                            Perched atop the Malibu hills, The Obsidian is more than a residence—it is an architectural masterpiece where contemporary design harmonizes with the raw beauty of nature. Floor-to-ceiling windows frame breathtaking ocean vistas, while curated interiors by renowned designers create an atmosphere of refined elegance.
+                            Situated directly on legendary Music Row, our condo immerses you in the rhythm of Nashville. You are just steps away from the historic studios where icons like Elvis and Dolly Parton recorded their hits. This isn't just a place to stay; it's a front-row seat to music history.
                         </p>
                         <p className="text-base text-stone-700 leading-relaxed mb-4">
-                            Every detail has been thoughtfully considered, from the hand-selected furnishings to the seamless integration of smart home technology. Our vision was to create a space that feels both exclusive and welcoming, where luxury is experienced through simplicity and sophistication.
+                            Beyond the history, you'll find every modern convenience. From the rooftop sky lounge with panoramic city views to the resort-style pool and state-of-the-art gym, we've designed this space to be your ultimate urban retreat. Walk to Vanderbilt, Belmont, or take a quick ride to the honky-tonks on Broadway.
                         </p>
                         <blockquote className="border-l-2 border-[#A18058] pl-4 italic text-[#A18058] text-lg">
-                            "A retreat designed for those who appreciate the finer things in life."
+                            "The perfect blend of excitement and relaxation, right in the heart of Music City."
                         </blockquote>
                     </motion.div>
                 </div>
@@ -91,7 +99,7 @@ export default function AboutPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="text-[#A18058] font-semibold tracking-[0.2em] text-[10px] uppercase mb-3 block text-center"
                     >
-                        The Property
+                        Amenities
                     </motion.span>
                     <motion.h2
                         initial={{ opacity: 0, y: 20 }}
@@ -99,116 +107,47 @@ export default function AboutPage() {
                         transition={{ delay: 0.1 }}
                         className="text-4xl md:text-5xl serif font-light text-stone-900 mb-12 text-center"
                     >
-                        Designed for Distinction
+                        Everything You Need
                     </motion.h2>
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <FeatureCard
-                            icon={Building2}
-                            title="Architectural Excellence"
-                            description="Modern design featuring floor-to-ceiling windows, clean lines, and seamless indoor-outdoor living spaces."
+                            icon={Music}
+                            title="Music Row Location"
+                            description="Walk to historic studios, Vanderbilt University, and Belmont. Minutes from Broadway."
                             delay={0.2}
                         />
                         <FeatureCard
-                            icon={Eye}
-                            title="Breathtaking Views"
-                            description="Panoramic ocean and hillside vistas from every room, offering stunning sunsets and natural beauty."
+                            icon={Sparkles}
+                            title="Rooftop Sky Lounge"
+                            description="Relax with stunning views of the Nashville skyline from the massive rooftop deck."
                             delay={0.3}
                         />
                         <FeatureCard
-                            icon={Palette}
-                            title="Curated Interiors"
-                            description="Designer furnishings, original artwork, and premium finishes create an atmosphere of refined luxury."
+                            icon={Home}
+                            title="Full Gym & Pool"
+                            description="Stay active with our state-of-the-art fitness center and seasonal outdoor pool."
                             delay={0.4}
                         />
                         <FeatureCard
-                            icon={Sparkles}
-                            title="Exclusive Amenities"
-                            description="Private infinity pool, in-home spa, gourmet kitchen, and state-of-the-art entertainment systems."
+                            icon={MapPin}
+                            title="Free Garage Parking"
+                            description="Rare for the area: secure, covered parking included with your stay."
                             delay={0.5}
                         />
                     </div>
                 </div>
             </div>
 
-            {/* The Experience Section */}
-            <div className="max-w-6xl mx-auto px-6 py-20">
-                <motion.span
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-[#A18058] font-semibold tracking-[0.2em] text-[10px] uppercase mb-3 block text-center"
-                >
-                    The Experience
-                </motion.span>
-                <motion.h2
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="text-4xl md:text-5xl serif font-light text-stone-900 mb-6 text-center"
-                >
-                    Designed for Unforgettable Moments
-                </motion.h2>
-                <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="text-lg text-stone-600 text-center max-w-3xl mx-auto mb-12"
-                >
-                    Whether you're seeking a peaceful retreat, celebrating a special occasion, or creating lasting memories with loved ones, The Obsidian provides the perfect backdrop. Our commitment to privacy, exceptional service, and attention to detail ensures that every stay is extraordinary.
-                </motion.p>
-
-                {/* Values */}
-                <div className="grid md:grid-cols-3 gap-6 mt-12">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                        className="text-center"
-                    >
-                        <div className="w-16 h-16 rounded-full bg-[#A18058]/10 flex items-center justify-center mx-auto mb-4">
-                            <Shield size={28} className="text-[#A18058]" />
-                        </div>
-                        <h3 className="text-xl serif font-medium text-stone-900 mb-2">Privacy & Exclusivity</h3>
-                        <p className="text-sm text-stone-600">Your sanctuary, exclusively yours. We host only one party at a time.</p>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
-                        className="text-center"
-                    >
-                        <div className="w-16 h-16 rounded-full bg-[#A18058]/10 flex items-center justify-center mx-auto mb-4">
-                            <Home size={28} className="text-[#A18058]" />
-                        </div>
-                        <h3 className="text-xl serif font-medium text-stone-900 mb-2">Exceptional Service</h3>
-                        <p className="text-sm text-stone-600">24/7 concierge support to ensure every detail of your stay is perfect.</p>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5 }}
-                        className="text-center"
-                    >
-                        <div className="w-16 h-16 rounded-full bg-[#A18058]/10 flex items-center justify-center mx-auto mb-4">
-                            <Mountain size={28} className="text-[#A18058]" />
-                        </div>
-                        <h3 className="text-xl serif font-medium text-stone-900 mb-2">Sustainable Luxury</h3>
-                        <p className="text-sm text-stone-600">Thoughtfully designed to minimize environmental impact while maximizing comfort.</p>
-                    </motion.div>
-                </div>
-            </div>
-
             {/* CTA Section */}
-            <div className="bg-stone-900 py-20">
+            <div className="bg-[#1C1917] py-20">
                 <div className="max-w-4xl mx-auto px-6 text-center">
                     <motion.h2
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="text-4xl md:text-5xl serif font-light text-white mb-6"
                     >
-                        Ready to Experience The Obsidian?
+                        Ready for Your Nashville Getaway?
                     </motion.h2>
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
@@ -216,7 +155,7 @@ export default function AboutPage() {
                         transition={{ delay: 0.1 }}
                         className="text-lg text-stone-300 mb-8"
                     >
-                        Discover your perfect dates and begin planning your luxury escape.
+                        Book your dates today and experience the best of Music City.
                     </motion.p>
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -224,10 +163,10 @@ export default function AboutPage() {
                         transition={{ delay: 0.2 }}
                     >
                         <Link
-                            href="/availability"
+                            href="/#book"
                             className="inline-flex items-center gap-2 bg-[#A18058] hover:bg-[#8a6a47] text-white px-8 py-4 rounded-full text-sm font-semibold uppercase tracking-widest transition-all shadow-lg"
                         >
-                            View Availability
+                            Book Now
                         </Link>
                     </motion.div>
                 </div>

@@ -3,6 +3,7 @@
 import React from 'react';
 import { Star, ShieldCheck, MessageCircle, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 export const Host: React.FC = () => {
     return (
@@ -50,9 +51,12 @@ export const Host: React.FC = () => {
                             </p>
 
                             <div className="flex justify-center md:justify-start gap-4">
-                                <button className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider bg-[#1C1917] text-white px-6 py-3 rounded-full hover:bg-stone-800 transition-colors">
+                                <Link
+                                    href="/contact"
+                                    className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider bg-[#1C1917] text-white px-6 py-3 rounded-full hover:bg-stone-800 transition-colors"
+                                >
                                     <MessageCircle size={14} /> Contact Host
-                                </button>
+                                </Link>
                                 <div className="inline-flex items-center gap-2 text-xs font-medium text-stone-500 px-4 py-3">
                                     <Clock size={14} /> Responds within 1 hour
                                 </div>
