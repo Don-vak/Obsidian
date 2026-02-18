@@ -5,10 +5,14 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Key, Menu, ArrowRight } from 'lucide-react';
 
-export const Navbar: React.FC = () => {
+interface NavbarProps {
+  isAdminUser?: boolean;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ isAdminUser = false }) => {
   const [scrolled, setScrolled] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const pathname = usePathname();
+  const isAdmin = isAdminUser;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -16,16 +20,6 @@ export const Navbar: React.FC = () => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const checkUser = async () => {
-      const { createClient } = await import('@/lib/supabase/client');
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) setIsAdmin(true);
-    };
-    checkUser();
   }, []);
 
   const navLinks = [

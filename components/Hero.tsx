@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import Image from 'next/image';
 import { Star, Calendar, Users, ArrowRight, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
@@ -19,13 +20,18 @@ import {
   addDays,
 } from 'date-fns';
 
-interface BlockedDate {
+export interface BlockedDate {
   start: string;
   end: string;
   reason: string;
 }
 
-export const Hero: React.FC = () => {
+interface HeroProps {
+  initialBlockedDates: BlockedDate[];
+  nightlyRate: number | null;
+}
+
+export const Hero: React.FC<HeroProps> = ({ initialBlockedDates, nightlyRate: initialNightlyRate }) => {
   const router = useRouter();
   const [checkIn, setCheckIn] = useState<Date | null>(null);
   const [checkOut, setCheckOut] = useState<Date | null>(null);
@@ -35,37 +41,10 @@ export const Hero: React.FC = () => {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(startOfMonth(new Date()));
   const [hoveredDate, setHoveredDate] = useState<Date | null>(null);
-  const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
-  const [isLoadingDates, setIsLoadingDates] = useState(false);
-  const [nightlyRate, setNightlyRate] = useState<number | null>(null);
+  const [blockedDates] = useState<BlockedDate[]>(initialBlockedDates);
+  const [nightlyRate] = useState<number | null>(initialNightlyRate);
   const calendarRef = useRef<HTMLDivElement>(null);
 
-  // Fetch nightly rate
-  useEffect(() => {
-    fetch('/api/pricing/nightly-rate')
-      .then(res => res.json())
-      .then(data => setNightlyRate(data.nightlyRate))
-      .catch(() => setNightlyRate(450));
-  }, []);
-
-  // Fetch blocked dates
-  useEffect(() => {
-    const fetchBlockedDates = async () => {
-      setIsLoadingDates(true);
-      try {
-        const response = await fetch('/api/blocked-dates');
-        if (response.ok) {
-          const data = await response.json();
-          setBlockedDates(data);
-        }
-      } catch (err) {
-        console.error('Error fetching blocked dates:', err);
-      } finally {
-        setIsLoadingDates(false);
-      }
-    };
-    fetchBlockedDates();
-  }, []);
 
   // Close calendar on click outside
   useEffect(() => {
@@ -270,18 +249,28 @@ export const Hero: React.FC = () => {
 
   return (
     <header className="relative h-screen min-h-[800px] flex items-center justify-center overflow-hidden">
+
+
       {/* Background */}
       <div className="absolute inset-0 z-0">
-        <motion.img
+        <motion.div
           initial={{ scale: 1.1 }}
           animate={{ scale: 1 }}
           transition={{ duration: 1.5, ease: "easeOut" }}
-          src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=2574&auto=format&fit=crop"
-          alt="The Obsidian Interior"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-[#3f3b35]/20 mix-blend-multiply"></div>
-        <div className="bg-gradient-to-b via-transparent from-stone-900/40 to-stone-900/20 absolute top-0 right-0 bottom-0 left-0"></div>
+          className="relative w-full h-full"
+        >
+          <Image
+            src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=2574&auto=format&fit=crop"
+            alt="The Obsidian Interior"
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
+            quality={90}
+          />
+        </motion.div>
+        <div className="absolute inset-0 bg-[#3f3b35]/20 mix-blend-multiply pointer-events-none"></div>
+        <div className="bg-gradient-to-b via-transparent from-stone-900/40 to-stone-900/20 absolute top-0 right-0 bottom-0 left-0 pointer-events-none"></div>
       </div>
 
       <div className="z-10 w-full max-w-7xl mx-auto pt-20 px-6 relative">

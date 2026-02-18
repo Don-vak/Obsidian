@@ -31,7 +31,13 @@ export const Gallery: React.FC = () => {
               transition={{ delay: index * 0.1 }}
               className="break-inside-avoid rounded-2xl overflow-hidden group cursor-pointer relative"
             >
-              <img src={src} className="w-full object-cover transition-transform duration-700 group-hover:scale-105" alt={`Gallery ${index + 1}`} />
+              <img
+                src={src}
+                className="w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                alt={`Gallery ${index + 1}`}
+                loading="lazy"
+                decoding="async"
+              />
               <div className="absolute inset-0 group-hover:bg-black/10 transition-colors bg-black/0"></div>
             </motion.div>
           ))}

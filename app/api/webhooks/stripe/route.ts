@@ -76,36 +76,39 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
     const supabase = createServiceRoleClient()
     const metadata = paymentIntent.metadata
 
-    // Check if booking already exists (idempotency)
-    const { data: existingBooking } = await supabase
-        .from('bookings')
-        .select('id')
-        .eq('stripe_payment_intent_id', paymentIntent.id)
-        .single()
+    // Parallelize: Check if booking already exists AND Get pricing config
+    const [existingBookingResult, configResult] = await Promise.all([
+        supabase
+            .from('bookings')
+            .select('id')
+            .eq('stripe_payment_intent_id', paymentIntent.id)
+            .single(),
+        supabase
+            .from('pricing_config')
+            .select('*')
+            .lte('effective_from', new Date().toISOString().split('T')[0])
+            .or(`effective_to.is.null,effective_to.gte.${new Date().toISOString().split('T')[0]}`)
+            .order('effective_from', { ascending: false })
+            .limit(1)
+            .single()
+    ])
+
+    const existingBooking = existingBookingResult.data
+    const config = configResult.data
 
     if (existingBooking) {
         console.log('Booking already exists for payment intent:', paymentIntent.id)
         return
     }
 
+    if (!config) {
+        throw new Error('Pricing config not found')
+    }
+
     // Calculate nights
     const checkInDate = new Date(metadata.checkIn)
     const checkOutDate = new Date(metadata.checkOut)
     const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24))
-
-    // Get pricing config to calculate breakdown
-    const { data: config } = await supabase
-        .from('pricing_config')
-        .select('*')
-        .lte('effective_from', new Date().toISOString().split('T')[0])
-        .or(`effective_to.is.null,effective_to.gte.${new Date().toISOString().split('T')[0]}`)
-        .order('effective_from', { ascending: false })
-        .limit(1)
-        .single()
-
-    if (!config) {
-        throw new Error('Pricing config not found')
-    }
 
     // Calculate pricing breakdown
     const nightly_rate = Number(config.base_nightly_rate)
@@ -210,15 +213,14 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
         // Don't throw - booking is more important
     }
 
-    // Send email notifications (non-blocking)
+    // Send email notifications (non-blocking, parallel)
     try {
         const { sendBookingConfirmation, sendAdminBookingNotification } = await import('@/lib/email/send')
 
-        // Send confirmation to guest
-        await sendBookingConfirmation(booking)
-
-        // Send notification to admin
-        await sendAdminBookingNotification(booking)
+        await Promise.allSettled([
+            sendBookingConfirmation(booking),
+            sendAdminBookingNotification(booking)
+        ])
     } catch (emailError) {
         console.error('Error sending emails:', emailError)
         // Don't throw - booking succeeded, email is secondary

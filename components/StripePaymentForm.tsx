@@ -104,9 +104,9 @@ function CheckoutForm({ onSuccess, onError, totalAmount }: Omit<PaymentFormProps
                 )}
                 <PaymentElement
                     onReady={() => setIsElementReady(true)}
-                    options={{
-                        layout: 'tabs',
-                    }}
+                    options={React.useMemo(() => ({
+                        layout: 'tabs' as const,
+                    }), [])}
                 />
             </div>
 
@@ -144,7 +144,7 @@ function CheckoutForm({ onSuccess, onError, totalAmount }: Omit<PaymentFormProps
 }
 
 export function StripePaymentForm({ clientSecret, onSuccess, onError, totalAmount }: PaymentFormProps) {
-    const options = {
+    const options = React.useMemo(() => ({
         clientSecret,
         appearance: {
             theme: 'stripe' as const,
@@ -158,7 +158,7 @@ export function StripePaymentForm({ clientSecret, onSuccess, onError, totalAmoun
                 borderRadius: '12px',
             },
         },
-    };
+    }), [clientSecret]);
 
     return (
         <Elements stripe={stripePromise} options={options}>
