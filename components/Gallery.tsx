@@ -4,12 +4,15 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const images = [
-  "https://images.unsplash.com/photo-1613545325278-f24b0cae1224?q=80&w=2670&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2670&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=2671&auto=format&fit=crop",
-  "https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/ed0a13b6-9910-46dd-b50a-742d26eb0221_1600w.jpg",
-  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2670&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=2670&auto=format&fit=crop"
+  "/images/chic-condo/imgi_141_dbb0d895.jpg",
+  "/images/chic-condo/imgi_158_cd6ea3b4.jpg",
+  "/images/chic-condo/imgi_196_5cfa6a5b.jpg",
+  "/images/chic-condo/imgi_199_3cefc501.jpg",
+  "/images/chic-condo/imgi_180_ce83dc2b.jpg",
+  "/images/chic-condo/imgi_167_1e67cddc.jpg",
+  "/images/chic-condo/imgi_145_533b70ac.jpg",
+  "/images/chic-condo/imgi_174_14c6cb90.jpg",
+  "/images/chic-condo/imgi_177_ffaea34b.jpg"
 ];
 
 export const Gallery: React.FC = () => {
@@ -18,7 +21,7 @@ export const Gallery: React.FC = () => {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <span className="text-[#A18058] font-semibold tracking-[0.2em] text-[10px] uppercase mb-3 block">Visual Tour</span>
-          <h2 className="text-3xl md:text-4xl serif text-stone-900 font-light">Life at The Obsidian</h2>
+          <h2 className="text-3xl md:text-4xl serif text-stone-900 font-light">Inside the Residence</h2>
         </div>
 
         <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">

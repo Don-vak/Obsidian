@@ -2,7 +2,9 @@ import { Hero, BlockedDate } from '@/components/Hero';
 import { PropertyDetails } from '@/components/PropertyDetails';
 import { Amenities } from '@/components/Amenities';
 import { Gallery } from '@/components/Gallery';
+import { Host } from '@/components/Host';
 import { Location } from '@/components/Location';
+import { HouseRules } from '@/components/HouseRules';
 import { Testimonials } from '@/components/Testimonials';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
@@ -87,7 +89,9 @@ export default async function Home() {
             <PropertyDetails />
             <Amenities />
             <Gallery />
+            <Host />
             <Location />
+            <HouseRules />
             <Testimonials />
         </>
     );

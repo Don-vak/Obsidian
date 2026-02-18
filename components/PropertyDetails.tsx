@@ -16,32 +16,32 @@ export const PropertyDetails: React.FC = () => {
             transition={{ duration: 0.8 }}
             className="lg:w-1/2"
           >
-            <span className="text-[10px] uppercase block font-semibold text-[#A18058] tracking-[0.2em] mb-4">The Property</span>
+            <span className="text-[10px] uppercase block font-semibold text-[#A18058] tracking-[0.2em] mb-4">The Residence</span>
             <h2 className="text-4xl lg:text-5xl mb-8 serif leading-tight tracking-tight text-stone-900 font-light">
-              Designed for the <br />
-              <span className="text-stone-500 italic">discerning traveler.</span>
+              Your Backstage Pass <br />
+              <span className="text-stone-500 italic">to Nashville.</span>
             </h2>
             <div className="space-y-6 text-stone-500 text-sm font-light leading-relaxed max-w-md">
               <p>
-                Nestled on a private ridge, The Obsidian is more than a vacation rental; it is a curated experience of modern luxury. Constructed with sustainable materials and seamlessly integrated into the landscape, the residence blurs the line between indoor comfort and outdoor majesty.
+                Luxury condo with <strong>free garage parking</strong> connected to this new, secure building. Incredible amenities including a pool, massive rooftop deck with city views, gym, and conference room.
               </p>
               <p>
-                Whether you are seeking a creative retreat or a romantic getaway, the silence here is broken only by the wind in the pines. Every detail, from the linen sheets to the locally sourced ceramics, has been chosen with intention.
+                Located on legendary <strong>Music Row</strong>, walk past recording studios on your way to coffee & live music. Only 2 miles to Downtown Broadway bars and 0.5 miles to Belmont & Vanderbilt. Furnished with thoughtful, high-end decor for maximum comfort.
               </p>
             </div>
 
             <div className="mt-10 flex gap-8 border-t pt-8 border-stone-200">
               <div>
-                <div className="text-2xl serif mb-1 text-stone-900">3,200</div>
-                <div className="text-[9px] uppercase tracking-widest text-stone-400">Square Feet</div>
+                <div className="text-2xl serif mb-1 text-stone-900">8</div>
+                <div className="text-[9px] uppercase tracking-widest text-stone-400">Sleeps</div>
               </div>
               <div>
-                <div className="text-2xl serif mb-1 text-stone-900">2.5</div>
-                <div className="text-[9px] uppercase tracking-widest text-stone-400">Acres</div>
+                <div className="text-2xl serif mb-1 text-stone-900">2</div>
+                <div className="text-[9px] uppercase tracking-widest text-stone-400">Bedrooms</div>
               </div>
               <div>
-                <div className="text-2xl serif mb-1 text-stone-900">2023</div>
-                <div className="text-[9px] uppercase tracking-widest text-stone-400">Built</div>
+                <div className="text-2xl serif mb-1 text-stone-900">Prime</div>
+                <div className="text-[9px] uppercase tracking-widest text-stone-400">Location</div>
               </div>
             </div>
           </motion.div>
@@ -54,7 +54,7 @@ export const PropertyDetails: React.FC = () => {
             className="lg:w-1/2 relative"
           >
             <div className="relative rounded-[2rem] overflow-hidden shadow-2xl">
-              <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2606&auto=format&fit=crop" className="w-full object-cover aspect-[4/5] hover:scale-105 transition-transform duration-1000" alt="Exterior" />
+              <img src="/images/chic-condo/imgi_160_ab16be7b.jpg" className="w-full object-cover aspect-[4/5] hover:scale-105 transition-transform duration-1000" alt="Chic Condo Exterior" />
               {/* Floating Badge */}
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
@@ -67,7 +67,7 @@ export const PropertyDetails: React.FC = () => {
                     <Star key={i} size={10} className="fill-[#A18058]" />
                   ))}
                 </div>
-                <p className="text-[10px] leading-relaxed font-medium text-stone-600">"The most stunning property we have ever stayed at. A true masterpiece."</p>
+                <p className="text-[10px] leading-relaxed font-medium text-stone-600">"10/10 Loved by Guests. Top 10% of guest reviews in this area."</p>
               </motion.div>
             </div>
           </motion.div>

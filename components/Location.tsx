@@ -28,18 +28,18 @@ export const Location: React.FC = () => {
           >
             <span className="text-[#A18058] font-semibold tracking-[0.2em] text-[10px] uppercase mb-3 block">The Location</span>
             <h2 className="text-4xl md:text-5xl serif leading-tight text-[#FAFAF9] mb-6">
-              Secluded, yet <br />
-              <span className="text-stone-500 italic">connected.</span>
+              Steps from <br />
+              <span className="text-stone-500 italic">History.</span>
             </h2>
             <p className="text-stone-400 font-light leading-relaxed mb-8">
-              The Obsidian is situated in the prestigious Hidden Hills enclave. Surrounded by 300 acres of protected nature preserve, you are guaranteed absolute privacy while being only minutes away from the region's finest dining and culture.
+              Located on legendary Music Row, you are walking distance to Vanderbilt, Belmont, and historic recording studios. Enjoy a quiet escape that is just a short ride to the energy of Broadway.
             </p>
 
             <div className="space-y-6">
               {[
-                { label: "Downtown", time: "15 min drive", icon: Car },
-                { label: "International Airport", time: "45 min drive", icon: Navigation },
-                { label: "National Park Entrance", time: "5 min drive", icon: MapPin },
+                { label: "Vanderbilt University", time: "3 min walk", icon: MapPin },
+                { label: "Broadway Bars", time: "5 min drive", icon: Car },
+                { label: "BNA Airport", time: "15 min drive", icon: Navigation },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-4 text-stone-300 group">
                   <div className="w-10 h-10 rounded-full border border-stone-700 bg-stone-800/50 flex items-center justify-center text-[#A18058] group-hover:bg-[#A18058] group-hover:text-white transition-all">

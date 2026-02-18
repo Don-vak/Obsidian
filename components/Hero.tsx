@@ -260,8 +260,8 @@ export const Hero: React.FC<HeroProps> = ({ initialBlockedDates, nightlyRate: in
           className="relative w-full h-full"
         >
           <Image
-            src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=2574&auto=format&fit=crop"
-            alt="The Obsidian Interior"
+            src="/images/chic-condo/imgi_165_24090554.jpg"
+            alt="Chic Music Row Condo"
             fill
             priority
             className="object-cover"
@@ -269,8 +269,8 @@ export const Hero: React.FC<HeroProps> = ({ initialBlockedDates, nightlyRate: in
             quality={90}
           />
         </motion.div>
-        <div className="absolute inset-0 bg-[#3f3b35]/20 mix-blend-multiply pointer-events-none"></div>
-        <div className="bg-gradient-to-b via-transparent from-stone-900/40 to-stone-900/20 absolute top-0 right-0 bottom-0 left-0 pointer-events-none"></div>
+        <div className="absolute inset-0 bg-[#3f3b35]/30 mix-blend-multiply pointer-events-none"></div>
+        <div className="bg-gradient-to-b via-transparent from-stone-900/50 to-stone-900/30 absolute top-0 right-0 bottom-0 left-0 pointer-events-none"></div>
       </div>
 
       <div className="z-10 w-full max-w-7xl mx-auto pt-20 px-6 relative">
@@ -285,26 +285,26 @@ export const Hero: React.FC<HeroProps> = ({ initialBlockedDates, nightlyRate: in
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FAFAF9]/10 backdrop-blur-md border border-[#FAFAF9]/20 text-[#FAFAF9] text-[10px] font-medium tracking-[0.2em] uppercase mb-8"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-[#A18058] animate-pulse-slow"></span>
-              Direct Booking Exclusive
+              Music Row, Nashville
             </motion.div>
 
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
-              className="md:text-7xl lg:text-8xl leading-[0.95] text-5xl font-light text-gray-50 tracking-tight font-serif mb-6 drop-shadow-lg"
+              className="md:text-6xl lg:text-7xl leading-[0.95] text-5xl font-light text-gray-50 tracking-tight font-serif mb-6 drop-shadow-lg"
             >
-              Sanctuary in <br />
-              <span className="font-light text-stone-200 opacity-90 italic">the hills.</span>
+              Chic Music Row <br />
+              <span className="font-light text-stone-200 opacity-90 italic">Condo.</span>
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9 }}
-              className="leading-relaxed text-lg font-light text-gray-50 opacity-90 max-w-md mb-10 drop-shadow-md"
+              className="leading-relaxed text-lg font-light text-gray-50 opacity-90 max-w-xl mb-10 drop-shadow-md"
             >
-              A masterfully designed architectural gem offering absolute privacy and panoramic views.
+              Pool, Rooftop Deck with City View, Gym, Office + More! A luxury escape steps from historic recording studios.
             </motion.p>
           </div>
 
