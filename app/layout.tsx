@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -38,6 +39,7 @@ export default function RootLayout({
         <html lang="en" className="scroll-smooth">
             <body className={`${inter.variable} ${playfair.variable} antialiased selection:bg-[#A18058] selection:text-white font-sans`} suppressHydrationWarning>
                 {children}
+                <Analytics />
             </body>
         </html>
     );
