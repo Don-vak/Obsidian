@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
             () => {
                 let query = supabase
                     .from('blocked_dates')
-                    .select('*')
+                    .select('start_date, end_date, reason')
                     .order('start_date', { ascending: true })
 
                 if (month) {

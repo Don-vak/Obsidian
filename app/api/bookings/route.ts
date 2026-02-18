@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
             `availability:${body.checkIn}:${body.checkOut}`,
             () => supabase
                 .from('blocked_dates')
-                .select('*')
+                .select('id')
                 .lt('start_date', body.checkOut)
                 .gt('end_date', body.checkIn),
             'check-booking-availability',

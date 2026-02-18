@@ -2,10 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import * as Sentry from '@sentry/nextjs'
+import { CreatePaymentIntentSchema } from '@/lib/schemas/api'
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json()
+        const result = CreatePaymentIntentSchema.safeParse(body)
+
+        if (!result.success) {
+            return NextResponse.json(
+                { error: 'Invalid request data', details: result.error.flatten() },
+                { status: 400 }
+            )
+        }
+
         const {
             checkIn,
             checkOut,
@@ -18,15 +28,7 @@ export async function POST(request: NextRequest) {
             tripPurpose,
             arrivalTime,
             verificationSessionId
-        } = body
-
-        // Validate required fields
-        if (!checkIn || !checkOut || !totalAmount || !guestEmail) {
-            return NextResponse.json(
-                { error: 'Missing required fields' },
-                { status: 400 }
-            )
-        }
+        } = result.data
 
         // Verify availability one more time before creating payment intent
         const supabase = await createServerSupabaseClient()

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import * as Sentry from '@sentry/nextjs'
+import { CreateDepositHoldSchema } from '@/lib/schemas/api'
 
 const DEPOSIT_AMOUNT = 1000 // $1,000 security deposit
 const MAX_RETRIES = 10
@@ -15,14 +16,16 @@ function sleep(ms: number) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json()
-        const { paymentMethodId, paymentIntentId } = body
+        const result = CreateDepositHoldSchema.safeParse(body)
 
-        if (!paymentMethodId || !paymentIntentId) {
+        if (!result.success) {
             return NextResponse.json(
-                { error: 'Missing required fields: paymentMethodId and paymentIntentId' },
+                { error: 'Invalid request data', details: result.error.flatten() },
                 { status: 400 }
             )
         }
+
+        const { paymentMethodId, paymentIntentId } = result.data
 
         const supabase = createServiceRoleClient()
 
